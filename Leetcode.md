@@ -290,3 +290,72 @@ class Solution {
 }
 ```
 
+<font color="#FF0000">*12.顺时针打印二维矩阵</font>
+
+> 输入一个矩阵，按照从外向里以顺时针的顺序依次打印出每一个数字。
+
+```java
+public static int[] spiralOrder(int[][] matrix) {
+        int length = matrix[0].length * matrix.length;
+        int[] newMatrix = new int[length];
+        int xia = matrix.length - 1, shang = 0, you = matrix[0].length - 1, zuo = 0, n = 0;//定义上下左右边界
+        if (matrix.length == 0) return new int[0];
+    /*
+      *四个方向循环
+      */
+        while (true) {
+            for (int j = zuo; j <= you; j++)  newMatrix[n++] = matrix[shang][j];	//从左边界往右不超过右边界
+            if (++shang > xia)    break;	//上边界大于下边界跳出
+            for (int i = shang; i <= xia; i++)  newMatrix[n++] = matrix[i][you];	//从上边界往下不超过下边界
+            if (--you < zuo)    break;	//右边界小于左边界跳出
+            for (int j = you; j >= zuo; j--) newMatrix[n++] = matrix[xia][j];	//从右边界往左不超过左边界
+            if (--xia < shang)  break;	//下边界大于上边界跳出
+            for (int i = xia; i >= shang; i--)   newMatrix[n++] = matrix[i][zuo];	//从下边界往上不超过上边界
+            if (++zuo > you)    break;	//左边界大于右边界跳出
+        }
+        return newMatrix;
+    }
+```
+
+13.包含min函数的栈	<font color="#FF0000">要求:min()以O(1)运行</font>
+
+```
+MinStack minStack = new MinStack();
+minStack.push(-2);
+minStack.push(0);
+minStack.push(-3);
+minStack.min();   --> 返回 -3.
+minStack.pop();
+minStack.top();      --> 返回 0.
+minStack.min();   --> 返回 -2.
+```
+
+```java
+public class MinStack {
+    Stack<Integer> stackA, stackB;
+    public MinStack() {
+        stackA = new Stack<>();
+        stackB = new Stack<>();
+    }
+
+    public void push(int x) {
+        stackA.push(x);
+        if (stackB.empty() || stackB.peek() > x)    stackB.push(x);
+    }
+
+    public void pop() {
+        if (stackA.pop() == stackB.peek())
+            stackB.pop();
+    }
+
+    public int top() {
+        return stackA.peek();
+    }
+
+    public int min() {
+        return stackB.peek();
+    }
+}
+```
+
+
