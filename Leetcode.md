@@ -1,13 +1,13 @@
 ###### 1.翻转二叉树
 
 > 输入：
->   4
+> 	4
 >    /   \
 >   2     7
 >  / \   / \
 > 1   3 6   9
 > 输出：
->   4
+> 	4
 >    /   \
 >   7     2
 >  / \   / \
@@ -253,7 +253,7 @@ class Solution {
 
 > 二叉树 [1,2,2,3,4,4,3] 是对称的。
 >
-> 1
+> ​	1
 >   / \
 >  2  2
 >  / \ / \
@@ -261,7 +261,7 @@ class Solution {
 >
 > [1,2,2,null,3,null,3] 则不是镜像对称的:
 >
-> 1
+> ​	1
 >   / \
 >  2  2
 >   \  	\
@@ -409,13 +409,13 @@ public static List<List<Integer>> TreeOrder(TreeNode root){
 ```java
 	public static int majorityElement(int[] nums) {
         int length = nums.length;
-        Map<Integer,Integer> map = new HashMap<>();
+        Map<Integer,Integer> map = new HashMap<>();	//key = value, key存数组中数字，value存重复次数
         if (length == 0) return 0;
         for (int i = 0; i < length; i++){
-            if (map.containsKey(nums[i])){
-                int count = map.get(nums[i]);
-                map.put(nums[i], ++count);
-            }else map.put(nums[i], 1);
+            if (map.containsKey(nums[i])){	//若map包含nums[i]中数字
+                int count = map.get(nums[i]);	//获取key对应value
+                map.put(nums[i], ++count);	//更新对应关系
+            }else map.put(nums[i], 1);	//否则直接新增
         }
         for (int i : map.keySet()){
             if (map.get(i) * 2 > length)    return i;
