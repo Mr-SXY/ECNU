@@ -1,13 +1,13 @@
 ###### 1.翻转二叉树
 
 > 输入：
-> 	4
+>   4
 >    /   \
 >   2     7
 >  / \   / \
 > 1   3 6   9
 > 输出：
-> 	 4
+>   4
 >    /   \
 >   7     2
 >  / \   / \
@@ -114,7 +114,7 @@ class CQueue {
 }
 ```
 
-###### 3.找出数组中重复的数字。
+###### *3.找出数组中重复的数字	(hashset)
 
 ```java
 class Solution {
@@ -122,7 +122,7 @@ class Solution {
         Set<Integer> set = new HashSet<Integer>();
         int repeat = -1;
         for (int num : nums) {
-            if (!set.add(num)) {	//将数组元素添加进hashset
+            if (!set.add(num)) {	//将数组元素添加进hashset; add()方法添加重复元素返回false
                 repeat = num;
                 break;
             }
@@ -149,9 +149,7 @@ class Solution {
         while(i >= 0 && j <= matrix[0].length - 1){
             if(matrix[i][j] > target) i--;
             else if(matrix[i][j] < target) j++;
-            else{
-                flag = true;
-            }
+            else	flag = true;
         }
         return flag;
     }
@@ -164,19 +162,16 @@ class Solution {
 class Solution {
     public String replaceSpace(String s) {
         StringBuilder ns = new StringBuilder();
-        for(char c : s.toCharArray()){
-            if(c == ' '){	//''内表示char类型，""内表示String类型！！
-                ns.append("%20");
-            }else{
-                ns.append(c);
-            }
+        for(char c : s.toCharArray()){	//''内表示char类型，""内表示String类型
+            if(c == ' ')	ns.append("%20");
+            else	ns.append(c);
         }
         return ns.toString();
     }
 }
 ```
 
-###### 6.斐波那契数列	&&	青蛙跳台阶问题（一次跳1阶或2阶）
+###### *6.斐波那契数列	&&	青蛙跳台阶问题（一次跳1阶或2阶）
 
 ```java
 class Solution {
@@ -210,7 +205,7 @@ public class Solution {
 }//左移位运算符（<<）、右移位运算符（>>>）、带符号的右移位运算符（>>）
 ```
 
-###### <font color="#FF0000">*9.链表翻转</font>
+###### <font color="#FF0000">9.链表翻转</font>
 
 ```java
 class Solution {
@@ -231,7 +226,7 @@ class Solution {
 }
 ```
 
-###### <font color="#FF0000">*10.合并两个已排序链表</font>
+###### <font color="#FF0000">10.合并两个已排序链表</font>
 
 ```java
 class Solution {
@@ -258,7 +253,7 @@ class Solution {
 
 > 二叉树 [1,2,2,3,4,4,3] 是对称的。
 >
-> ​	1
+> 1
 >   / \
 >  2  2
 >  / \ / \
@@ -266,7 +261,7 @@ class Solution {
 >
 > [1,2,2,null,3,null,3] 则不是镜像对称的:
 >
-> ​	1
+> 1
 >   / \
 >  2  2
 >   \  	\
@@ -317,7 +312,7 @@ public static int[] spiralOrder(int[][] matrix) {
     }
 ```
 
-13.包含min函数的栈	<font color="#FF0000">要求:min()以O(1)运行</font>
+13.包含min函数的栈	<font color="#FF0000">要求:min()以O(1)运行	(双栈)</font>
 
 ```
 MinStack minStack = new MinStack();
@@ -358,4 +353,74 @@ public class MinStack {
 }
 ```
 
+<font color="#FF0000">13.二叉树的广度优先搜索	(队列)</font>
+
+```java
+public static List<TreeNode> TreeOrder(TreeNode root){
+        if (root == null)   return null;
+        Queue<TreeNode> queue = new LinkedList<>();
+        List<TreeNode> list = new LinkedList<>();
+        queue.offer(root);	//根节点入队
+    //队列实现
+        while (!queue.isEmpty()){
+            TreeNode temp = queue.poll();	//出队
+            list.add(temp);
+            if (temp.left != null)  queue.offer(temp.left);	//左子树不为空则入队
+            if (temp.right != null) queue.offer(temp.right);	//右子树不为空则入队
+        }
+        return list;
+    }
+```
+
+<font color="#FF0000">14.二叉树的广度优先搜索II</font>
+
+```
+给定二叉树：
+ 	3
+   / \
+  9  20
+    /  \
+   15   7
+返回[[3],[9,20],[15,7]]
+```
+
+```java
+public static List<List<Integer>> TreeOrder(TreeNode root){
+        if (root == null)   return null;
+        Queue<TreeNode> queue = new LinkedList<>();
+        List<List<Integer>> list = new LinkedList<>();
+        queue.offer(root);
+       while (!queue.isEmpty()){
+            List<Integer> l = new LinkedList<>();
+            for (int i = queue.size(); i > 0; i--) {	//队列长度即为二叉树每行元素个数
+                TreeNode temp = queue.poll();
+                l.add(temp.val);
+                if (temp.left != null) queue.offer(temp.left);
+                if (temp.right != null) queue.offer(temp.right);
+            }
+            list.add(l);
+        }
+        return list;
+    }
+```
+
+*15.数组中出现次数超过一半的数字	<font color="#FF0000">HashMap的运用</font>
+
+```java
+	public static int majorityElement(int[] nums) {
+        int length = nums.length;
+        Map<Integer,Integer> map = new HashMap<>();
+        if (length == 0) return 0;
+        for (int i = 0; i < length; i++){
+            if (map.containsKey(nums[i])){
+                int count = map.get(nums[i]);
+                map.put(nums[i], ++count);
+            }else map.put(nums[i], 1);
+        }
+        for (int i : map.keySet()){
+            if (map.get(i) * 2 > length)    return i;
+        }
+        return 0;
+    }	//另一种解法：先排序，数组中间的数就是超过一半的数
+```
 
