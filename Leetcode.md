@@ -424,3 +424,55 @@ public static List<List<Integer>> TreeOrder(TreeNode root){
     }	//另一种解法：先排序，数组中间的数就是超过一半的数
 ```
 
+16.数组最小的k个数
+
+```
+输入：arr = [3,2,1], k = 2
+输出：[1,2] 或者 [2,1]
+```
+
+```java
+public int[] getLeastNumbers(int[] arr, int k) {
+        int[] newArr = new int[k];
+        if (arr.length == 0)    return new int[0];
+        for (int gap = arr.length / 2; gap > 0; gap /= 2){	//shell排序
+            for (int i = gap; i < arr.length; i++) {
+                int temp = arr[i];
+                int j = i;
+                for (; j >= gap && temp < arr[j - gap]; j -= gap)
+                    arr[j] = arr[j - gap];
+                arr[j] = temp;
+            }
+        }
+        for (int i = 0; i < k; i++)
+            newArr[i] = arr[i];
+        return newArr;
+    }
+```
+
+*17.连续子数组的最大和
+
+```
+输入: nums = [-2,1,-3,4,-1,2,1,-5,4]
+输出: 6
+解释: 连续子数组 [4,-1,2,1] 的和最大，为 6。
+```
+
+```java
+public int maxSubArray(int[] nums) {
+        int length = nums.length;
+        if (length == 0)   return 0;
+        int[] res = new int[length];
+        res[0] = nums[0];
+        for (int i = 1; i < length; i++){
+            if (res[i - 1] >= 0) res[i] = res[i - 1] + nums[i];
+            else res[i] = nums[i];
+        }
+        int max = res[0];
+        for (int i = 1; i < length; i++){
+            if (res[i] > max)   max = res[i];
+        }
+        return  max;
+    }
+```
+
