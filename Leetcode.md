@@ -476,3 +476,39 @@ public int maxSubArray(int[] nums) {
     }
 ```
 
+18.找出两个链表的第一个公共节点
+
+```java
+public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        ListNode p = headA;
+        ListNode q = headB;
+        int counta = 1, countb = 1;
+        while (p != null){
+            counta++;
+            p = p.next;
+        }
+        while (q != null){
+            countb++;
+            q = q.next;
+        }
+        p = headA;
+        q = headB;
+        if (counta > countb){
+            for (int i = 0; i < counta - countb; i++)   p = p.next;
+            while (p != null){
+                p = p.next;
+                q= q.next;
+                if (p == q) return p; 
+            }
+        }else {
+            for (int i = 0; i < countb - counta; i++)   q = q.next;
+            while (p != null){
+                p = p.next;
+                q= q.next;
+                if (p == q) return p;
+            }
+        }
+        return null;
+    }
+```
+
