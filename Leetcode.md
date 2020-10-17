@@ -285,7 +285,7 @@ class Solution {
 }
 ```
 
-<font color="#FF0000">*12.顺时针打印二维矩阵</font>
+###### <font color="#FF0000">*12.顺时针打印二维矩阵</font>
 
 > 输入一个矩阵，按照从外向里以顺时针的顺序依次打印出每一个数字。
 
@@ -312,7 +312,7 @@ public static int[] spiralOrder(int[][] matrix) {
     }
 ```
 
-13.包含min函数的栈	<font color="#FF0000">要求:min()以O(1)运行	(双栈)</font>
+###### 13.包含min函数的栈	<font color="#FF0000">要求:min()以O(1)运行	(双栈)</font>
 
 ```
 MinStack minStack = new MinStack();
@@ -353,7 +353,7 @@ public class MinStack {
 }
 ```
 
-<font color="#FF0000">13.二叉树的广度优先搜索	(队列)</font>
+###### <font color="#FF0000">13.二叉树的广度优先搜索	(队列)</font>
 
 ```java
 public static List<TreeNode> TreeOrder(TreeNode root){
@@ -372,7 +372,7 @@ public static List<TreeNode> TreeOrder(TreeNode root){
     }
 ```
 
-<font color="#FF0000">14.二叉树的广度优先搜索II</font>
+###### <font color="#FF0000">14.二叉树的广度优先搜索II</font>
 
 ```
 给定二叉树：
@@ -404,7 +404,7 @@ public static List<List<Integer>> TreeOrder(TreeNode root){
     }
 ```
 
-*15.数组中出现次数超过一半的数字	<font color="#FF0000">HashMap的运用</font>
+###### *15.数组中出现次数超过一半的数字	<font color="#FF0000">HashMap的运用</font>
 
 ```java
 	public static int majorityElement(int[] nums) {
@@ -424,7 +424,7 @@ public static List<List<Integer>> TreeOrder(TreeNode root){
     }	//另一种解法：先排序，数组中间的数就是超过一半的数
 ```
 
-16.数组最小的k个数
+###### 16.数组最小的k个数
 
 ```
 输入：arr = [3,2,1], k = 2
@@ -450,7 +450,7 @@ public int[] getLeastNumbers(int[] arr, int k) {
     }
 ```
 
-*17.连续子数组的最大和
+###### *17.连续子数组的最大和	<font color="#FF0000">**动态规划**</font>
 
 ```
 输入: nums = [-2,1,-3,4,-1,2,1,-5,4]
@@ -462,17 +462,115 @@ public int[] getLeastNumbers(int[] arr, int k) {
 public int maxSubArray(int[] nums) {
         int length = nums.length;
         if (length == 0)   return 0;
-        int[] res = new int[length];
+        int[] res = new int[length];	//res[]存储子数组和
         res[0] = nums[0];
         for (int i = 1; i < length; i++){
-            if (res[i - 1] >= 0) res[i] = res[i - 1] + nums[i];
-            else res[i] = nums[i];
+            if (res[i - 1] >= 0) res[i] = res[i - 1] + nums[i];	//res[i - 1]为正表示之前的子数组对后续有提升
+            else res[i] = nums[i];	//res[i - 1]小于0，提升为负，重新确定子数组起始位置
         }
         int max = res[0];
         for (int i = 1; i < length; i++){
             if (res[i] > max)   max = res[i];
         }
         return  max;
+    }
+```
+
+###### *18.第一个只出现一次的字符	**HashMap**
+
+字符串 s 中找出第一个只出现一次的字符。如果没有，返回一个单空格。 s 只包含小写字母。
+
+```
+s = "abaccdeff"
+返回 "b"
+
+s = "" 
+返回 " "
+```
+
+```java
+public static char firstUniqChar(String s) {
+        if (s == "")    return ' ';
+        HashMap<Character,Integer> map = new HashMap<>();	//HasMap<Character,Boolean>更佳
+        for (int i = 0; i < s.length(); i++){
+            if (map.containsKey(s.charAt(i))) {
+                int count = map.get(s.charAt(i));
+                map.put(s.charAt(i), ++count);
+            }
+            else map.put(s.charAt(i),1);
+        }
+        for (char c : s.toCharArray()){	//HashMap无序，通过重新遍历String获取顺序
+            if (map.get(c) == 1)    return c;	//返回第一个value为1的key
+        }
+        return ' ';	//若return 0，输入空串返回'\u0000'
+    }
+```
+
+###### *19.找出两个链表的第一个公共节点
+
+```java
+public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        ListNode p = headA;
+        ListNode q = headB;
+        int counta = 1, countb = 1;
+    //遍历两个链表，得到各自长度
+        while (p != null){
+            counta++;
+            p = p.next;
+        }
+        while (q != null){
+            countb++;
+            q = q.next;
+        }
+    //重新指回首地址
+        p = headA;
+        q = headB;
+        if (counta > countb){
+            for (int i = 0; i < counta - countb; i++)   p = p.next;
+            while (p != null){
+                p = p.next;
+                q= q.next;
+                if (p == q) return p; 	//不是值val相等，而是节点相等
+            }
+        }else {
+            for (int i = 0; i < countb - counta; i++)   q = q.next;
+            while (p != null){
+                p = p.next;
+                q= q.next;
+                if (p == q) return p;
+            }
+        }
+        return null;
+    }
+```
+
+###### 20.二叉搜索树的第K大的节点
+
+```
+输入: root = [5,3,6,2,4,null,null,1], k = 3
+       5
+      / \
+     3   6
+    / \
+   2   4
+  /
+ 1
+输出: 4
+```
+
+```java
+public int kthLargest(TreeNode root, int k) {
+        List<Integer> list = new LinkedList<>();
+        list = TreetoList(root, list);
+        return list.get(list.size() - k);
+    }
+    public List<Integer> TreetoList(TreeNode root, List<Integer> list){
+        if (root != null){	//中序遍历
+            TreetoList(root.left, list);
+            list.add(root.val);
+            TreetoList(root.right, list);
+        }
+        return list;
     }
 ```
 
