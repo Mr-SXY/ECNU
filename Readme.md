@@ -1,4 +1,4 @@
-苦涩啊
+苦涩
 
 ```shell
 ssh-add ~/.ssh/id_rsa

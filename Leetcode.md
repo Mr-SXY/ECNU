@@ -564,6 +564,10 @@ public int kthLargest(TreeNode root, int k) {
         list = TreetoList(root, list);
         return list.get(list.size() - k);
     }
+/*
+*二叉搜索树的中序遍历即为递增序列，中序遍历倒序即为递减序列
+*用倒序更佳，即先TreetoList(root.right, list);	后TreetoList(root.left, list);
+*/
     public List<Integer> TreetoList(TreeNode root, List<Integer> list){
         if (root != null){	//中序遍历
             TreetoList(root.left, list);
