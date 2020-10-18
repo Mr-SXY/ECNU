@@ -424,7 +424,7 @@ public static List<List<Integer>> TreeOrder(TreeNode root){
     }	//另一种解法：先排序，数组中间的数就是超过一半的数
 ```
 
-###### 16.数组最小的k个数
+###### *16.数组最小的k个数	<font color="#FF0000">大顶堆</font>
 
 ```
 输入：arr = [3,2,1], k = 2
@@ -565,8 +565,8 @@ public int kthLargest(TreeNode root, int k) {
         return list.get(list.size() - k);
     }
 /*
-*二叉搜索树的中序遍历即为递增序列，中序遍历倒序即为递减序列
-*用倒序更佳，即先TreetoList(root.right, list);	后TreetoList(root.left, list);
+ *二叉搜索树的中序遍历即为递增序列，中序遍历倒序即为递减序列
+ *用倒序更佳，即先TreetoList(root.right, list);	后TreetoList(root.left, list);
 */
     public List<Integer> TreetoList(TreeNode root, List<Integer> list){
         if (root != null){	//中序遍历
@@ -575,6 +575,37 @@ public int kthLargest(TreeNode root, int k) {
             TreetoList(root.right, list);
         }
         return list;
+    }
+```
+
+###### <font color="#FF0000">*21.二叉树的深度</font>
+
+```java
+ public int maxDepth(TreeNode root) {
+        if (root == null) return 0;	//递归出口，若节点为空返回深度为0
+        int left = maxDepth(root.left);
+        int right = maxDepth(root.right);
+        return left > right ? left + 1 : right + 1;	//某节点的深度 等于 其左子树与右子树深度的最大值+1
+    }
+```
+
+<font color="#FF0000">*22.平衡二叉树的判断</font>	<font color="#FF0000">基于深度</font>
+
+```java
+public boolean isBalanced(TreeNode root) {
+        if (root == null)   return true;	//递归出口，若节点为空返回itrue
+        return isBalanced(root.left) && isBalanced(root.right) && Math.abs(Depth(root.left) - Depth(root.right)) <= 1;
+    }
+/*递归套娃
+ *判断一棵树是否为AVL树：
+ *1.其左子树和右子树均为AVL树；
+ *2.该节点的左子树右子树的深度差不超过1。
+ */
+    public int Depth(TreeNode root){
+        if (root == null)   return  0;
+        int left = Depth(root.left);
+        int right = Depth(root.right);
+        return left > right ? left+1 : right+1;
     }
 ```
 
