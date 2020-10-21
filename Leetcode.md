@@ -609,3 +609,46 @@ public boolean isBalanced(TreeNode root) {
     }
 ```
 
+23.和为s的两个数字
+
+输入为一个**递增序列**。
+
+```java
+输入：nums = [10,26,30,31,47,60], target = 40
+输出：[10,30] 或者 [30,10]
+
+//双指针一头一尾，大于target尾指针前移，小于头指针后移，相同break
+```
+
+<font color="#FF0000">*24.和为s的连续正数序列</font>
+
+```java
+输入：target = 15
+输出：[[1,2,3,4,5],[4,5,6],[7,8]]
+```
+
+```java
+/*采用双指针移动
+ *若指针区域内的和小于target，头指针前移；
+ *若指针区域内的和大于target，尾指针前移；
+  *若相等，加入新数组并加入链表，并且尾指针前移；
+ */
+public int[][] findContinuousSequence(int target) {
+        int length = target / 2 + 1;	//由于要求连续，故不会超过target的一半
+        List<int[]> res = new ArrayList<>();	//一维数组合并成二维采用ArrayList
+        for (int tail = 0, head = 1; tail < head;){	//尾指针超过头指针跳出循环
+            int[] newnum = new int[head-tail+1];
+            int sum = (tail+head+2)*(head-tail+1)/2;	//和可用公式求得
+            if (sum > target) tail++;
+            else if (sum < target) head++;
+            else {
+                for (int j = tail,n = 0; j <= head; j++)
+                    newnum[n++] = j+1;
+                res.add(newnum);
+                tail++;
+            }
+        }
+        return res.toArray(new int[res.size()][]);	//采用toArray(T[])方法返回T[]
+    }
+```
+
