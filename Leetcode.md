@@ -424,7 +424,7 @@ public static List<List<Integer>> TreeOrder(TreeNode root){
     }	//另一种解法：先排序，数组中间的数就是超过一半的数
 ```
 
-###### *16.数组最小的k个数	<font color="#FF0000">大顶堆</font>
+###### *16.数组最小的k个数	<font color="#FF0000">**大顶堆**</font>
 
 ```
 输入：arr = [3,2,1], k = 2
@@ -589,14 +589,14 @@ public int kthLargest(TreeNode root, int k) {
     }
 ```
 
-<font color="#FF0000">*22.平衡二叉树的判断</font>	<font color="#FF0000">基于深度</font>
+###### <font color="#FF0000">*22.平衡二叉树的判断</font>	<font color="#FF0000">**分治**</font>
 
 ```java
 public boolean isBalanced(TreeNode root) {
         if (root == null)   return true;	//递归出口，若节点为空返回itrue
         return isBalanced(root.left) && isBalanced(root.right) && Math.abs(Depth(root.left) - Depth(root.right)) <= 1;
     }
-/*递归套娃
+/*递归套娃	**分治算法**
  *判断一棵树是否为AVL树：
  *1.其左子树和右子树均为AVL树；
  *2.该节点的左子树右子树的深度差不超过1。
@@ -609,7 +609,7 @@ public boolean isBalanced(TreeNode root) {
     }
 ```
 
-23.和为s的两个数字
+###### 23.和为s的两个数字
 
 输入为一个**递增序列**。
 
@@ -620,7 +620,7 @@ public boolean isBalanced(TreeNode root) {
 //双指针一头一尾，大于target尾指针前移，小于头指针后移，相同break
 ```
 
-<font color="#FF0000">*24.和为s的连续正数序列</font>
+###### <font color="#FF0000">*24.和为s的连续正数序列</font>	**滑动窗口法**
 
 ```java
 输入：target = 15
@@ -649,6 +649,46 @@ public int[][] findContinuousSequence(int target) {
             }
         }
         return res.toArray(new int[res.size()][]);	//采用toArray(T[])方法返回T[]
+    }
+```
+
+###### *25.翻转单词顺序
+
+```java
+输入: "the sky is blue"
+输出: "blue is sky the"
+
+输入: "  hello world!  "
+输出: "world! hello"
+解释: 输入字符串可以在前面或者后面包含多余的空格，但是反转后的字符不能包括。
+
+输入: "a good   example"
+输出: "example good a"
+解释: 如果两个单词间有多余的空格，将反转后单词间的空格减少到只含一个。
+```
+
+```java
+public String reverseWords(String s) {
+    	s = s.trim();
+    /*	trim()实现
+      *int start = 0, end = s.length() - 1;
+      *while (s.charAt(start) == ' ') start++;
+      *while (s.charAt(end) == ' ') end--;
+      *return s.substring(start,end + 1);	substring(0,3)返回0到2之间的字符串
+      */
+        String[] danci = s.split(" ");
+        /*	split()实现
+      *
+      *
+      *
+      *return 
+      */
+    	StringBuilder res = new StringBuilder();
+        for (int i = danci.length - 1; i >= 0; i--){
+            if (danci[i].equals("")) continue;	//基本类型char使用==判断是否一致，String使用equals()判断
+            res.append(" " + danci[i]);
+        }
+        return res.toString().trim();
     }
 ```
 
