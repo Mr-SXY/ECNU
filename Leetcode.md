@@ -276,11 +276,11 @@ class Solution {
     /*
      *任意满足L.val == R.val的L、R节点还需满足：
      *L.left.val == R.right.val; L.right.val == L.left.val
-    */
+     */
     public boolean isEqual(TreeNode L, TreeNode R){
         if(L == null && R == null)	return true;
         if(L == null || R == null || L.val != R.val)	return false;
-        return recur(L.left, R.right) && recur(L.right, R.left);	//需同时满足L的左节点等于R的右节点；L的右节点等于R的左节点
+        return isEqual(L.left, R.right) && isEqual(L.right, R.left);	//需同时满足L的左节点等于R的右节点；L的右节点等于R的左节点
     }
 }
 ```
