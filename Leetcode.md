@@ -692,3 +692,34 @@ public String reverseWords(String s) {
     }
 ```
 
+###### *26.扑克牌中的顺子
+
+​	从扑克牌中随机抽5张牌，判断是不是一个顺子，即这5张牌是不是连续的。2～10为数字本身，A为1，J为11，Q为12，K为13，而大、小王为 0 ，可以看成任意数字。A 不能视为 14。
+
+```java
+输入: [1,2,3,4,5]
+输出: True
+```
+
+```java
+输入: [0,0,1,2,5]
+输出: True
+```
+
+```java
+public static boolean isStraight(int[] nums) {
+    /*满足两个条件：
+      *1.除0以外不重复；
+      *2.数组中max - min < 5
+      */
+        Arrays.sort(nums);
+        int p = 0, q = nums.length-1;
+        for (; nums[p] == 0; p++);	//	while(nums[p++]==0);	error
+        for (int i = p; i < q; i++){
+            if (nums[i] == nums[i+1])   return false;
+        }
+        if (nums[q]-nums[p] < 5)    return true;
+        return false;
+    }
+```
+
