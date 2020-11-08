@@ -692,7 +692,7 @@ public String reverseWords(String s) {
     }
 ```
 
-###### *26.扑克牌中的顺子
+###### *26.扑克牌中的顺子	HashSet判断重复
 
 ​	从扑克牌中随机抽5张牌，判断是不是一个顺子，即这5张牌是不是连续的。2～10为数字本身，A为1，J为11，Q为12，K为13，而大、小王为 0 ，可以看成任意数字。A 不能视为 14。
 
@@ -716,10 +716,56 @@ public static boolean isStraight(int[] nums) {
         int p = 0, q = nums.length-1;
         for (; nums[p] == 0; p++);	//	while(nums[p++]==0);	error
         for (int i = p; i < q; i++){
-            if (nums[i] == nums[i+1])   return false;
+            if (nums[i] == nums[i+1])   return false;	//已排序的数组，相邻重复
         }
         if (nums[q]-nums[p] < 5)    return true;
         return false;
     }
+```
+
+###### <span style="color : red">*27.圆圈中最后剩下的数字		**约瑟夫环**</span>
+
+0、1、2、3、4这5个数字组成一个圆圈，从数字0开始每次删除第3个数字，则删除的前4个数字依次是2、0、4、1，因此最后剩下的数字是3。
+
+```
+输入: n = 5, m = 3
+输出: 3
+
+输入: n = 10, m = 17
+输出: 2
+```
+
+```java
+public static int lastRemaining(int n, int m) {
+    //链表实现
+        ArrayList<Integer> list = new ArrayList<>();	//LinkedList超时
+        for (int i = 0; i < n; i++)
+            list.add(i);
+        for (int idx = 0; n > 1; n--){	//idx：移除数的下标
+            idx = (idx + m - 1) % n;	//删除节点下标的递推公式
+            list.remove(idx);
+        }
+        return list.get(0);
+    }
+```
+
+```java
+public static int lastRemaining(int n, int m) {
+    /*********数学实现********/
+        int res = 0;	//res为最终数字的下标
+        for (int i = 2; i <= n; i++){	//从n = 2开始反推
+            res = (res + m) % i;	//（公式）由结果往前推导出 原数组中 最终数字的下标
+        }
+        return res;	//下标与数字相同
+    }
+```
+
+```
+res=(res+m)%n		  n				  数组后面加上数组的复制来体现*环状*
+3=(0+3)%5					5				0 1 2 3 4 | 0 1 2 3 4
+0=(1+3)%4					4				3 4 0 1 | 3 4 0 1
+1=(1+3)%3					3				1 3 4 | 1 3 4
+1=(0+3)%2					2				1 3 | 1 3
+0	(由下往上)				1				3
 ```
 
