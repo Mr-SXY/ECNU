@@ -565,7 +565,7 @@ public int kthLargest(TreeNode root, int k) {
         return list.get(list.size() - k);
     }
 /*
- *二叉搜索树的中序遍历即为递增序列，中序遍历倒序即为递减序列
+ *二叉搜索树的 *中序遍历* 即为递增序列，中序遍历倒序即为递减序列
  *用倒序更佳，即先TreetoList(root.right, list);	后TreetoList(root.left, list);
 */
     public List<Integer> TreetoList(TreeNode root, List<Integer> list){
@@ -768,4 +768,39 @@ res=(res+m)%n		  n				  数组后面加上数组的复制来体现*环状*
 1=(0+3)%2					2				1 3 | 1 3
 0	(由下往上)				1				3
 ```
+
+###### *28.二叉搜索树的最近公共祖先
+
+```
+输入: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 8
+输出: 6 
+解释: 节点 2 和节点 8 的最近公共祖先是 6。
+
+输入: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 4
+输出: 2
+解释: 节点 2 和节点 4 的最近公共祖先是 2, 因为根据定义最近公共祖先节点可以为节点本身。
+
+说明：
+·所有节点的值都是唯一的。
+·p、q 为不同节点且均存在于给定的二叉搜索树中。
+```
+
+```java
+public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+    //二叉搜索树左小右大
+    //p,q的值均小于root，则最近公共祖先在root.left
+    //root的值介于p,q之间，则返回root
+        while (root != null){
+            if (root.val < p.val && root.val < q.val){
+                root = root.right;
+            }else if (root.val > q.val && root.val > p.val){
+                root = root.left;
+            }else {
+                break;
+            }
+        }
+        return root;
+    }
+```
+
 
