@@ -738,7 +738,7 @@ public static boolean isStraight(int[] nums) {
 ```java
 public static int lastRemaining(int n, int m) {
     //链表实现
-        ArrayList<Integer> list = new ArrayList<>();	//LinkedList超时
+        List<Integer> list = new ArrayList<>();	//LinkedList超时
         for (int i = 0; i < n; i++)
             list.add(i);
         for (int idx = 0; n > 1; n--){	//idx：移除数的下标
@@ -769,7 +769,7 @@ res=(res+m)%n		  n				  数组后面加上数组的复制来体现*环状*
 0	(由下往上)				1				3
 ```
 
-###### *28.二叉搜索树的最近公共祖先
+###### <span style="color : red">*28.二叉搜索树的最近公共祖先</span>
 
 ```
 输入: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 8
@@ -803,4 +803,33 @@ public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
     }
 ```
 
+###### <span style="color : red">*28.二叉树的最近公共祖先</span>
+
+```
+搜索树推广到普通二叉树
+```
+
+```java
+public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null){
+            return null;
+        }
+        if (root == p || root == q){
+            return root;
+        }
+    //后序遍历
+        TreeNode left = lowestCommonAncestor(root.left, p, q);
+        TreeNode right = lowestCommonAncestor(root.right, p ,q);
+        if (left != null && right != null){	//p,q分别在左右子树中
+            return root;
+        }
+        if (left != null){	//p,q在左子树中
+            return left;
+        }
+        if (right != null){	//p,q在右子树中
+            return right;
+        }
+        return null;
+    }
+```
 
