@@ -803,7 +803,7 @@ public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
     }
 ```
 
-###### <span style="color : red">*28.二叉树的最近公共祖先</span>
+###### <span style="color : red">*29.二叉树的最近公共祖先</span>
 
 ```
 BST推广到普通二叉树
