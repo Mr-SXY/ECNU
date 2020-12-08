@@ -66,19 +66,19 @@ class Solusion{
 ```
 
 ```java
-class Solution{
-    public TreeNode invertTree(TreeNode node){
+//本质上是前序遍历
+public TreeNode invertTree(TreeNode node){
         if(node == null){
             return null;
         }
         TreeNode left = node.left;
         node.left = node.right;
         node.right = left;
+    
         invertTree(node.left);
         invertTree(node.right);
         return node;
-    }
-}//递归实现
+}
 ```
 
 ###### 2.用两个栈实现一个队列。
@@ -205,7 +205,7 @@ public class Solution {
 }//左移位运算符（<<）、右移位运算符（>>>）、带符号的右移位运算符（>>）
 ```
 
-###### <font color="#FF0000">9.链表翻转</font>
+###### <font color="#FF0000">9.链表首尾翻转</font>
 
 ```java
 class Solution {
@@ -232,7 +232,7 @@ class Solution {
 class Solution {
         public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
             ListNode head = new ListNode(-1), l3 = head;
-            if(l1 == null && l2 == null)return null;
+            if(l1 == null && l2 == null)	return null;
             while(l1 != null && l2 != null){
                 if(l1.val < l2.val){
                     l3.next = l1;
@@ -361,7 +361,7 @@ public static List<TreeNode> TreeOrder(TreeNode root){
         Queue<TreeNode> queue = new LinkedList<>();
         List<TreeNode> list = new LinkedList<>();
         queue.offer(root);	//根节点入队
-    //队列实现
+
         while (!queue.isEmpty()){
             TreeNode temp = queue.poll();	//出队
             list.add(temp);
@@ -806,7 +806,7 @@ public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
 ###### <span style="color : red">*28.二叉树的最近公共祖先</span>
 
 ```
-搜索树推广到普通二叉树
+BST推广到普通二叉树
 ```
 
 ```java
