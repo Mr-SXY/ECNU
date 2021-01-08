@@ -14,7 +14,7 @@
 
 
 
-### 匿名内部类：
+### 匿名内部类
 
 ```java
 new InterfaceName(parameters){
@@ -68,7 +68,9 @@ executor.execute(new RunnableTask());//重写execute方法
 
 #### ExecutorService接口
 
-​	submit()方法
+​	submit()方法用于提交需要返回值的任务。线程池会返回一个 `Future` 类型的对象，通过这个 `Future` 对象可以判断任务是否执行成功。
+
+​	execute()方法用于提交不需要返回值的任务，无法判断任务是否被线程执行成功。
 
 #### ThreadPoolExecutor类
 
@@ -98,7 +100,7 @@ executor.execute(new RunnableTask());//重写execute方法
 
   线程池状态：
 
-- RUNNING：接受新的任务，处理等待队列中的任务（定义为-1）
+- RUNNING：**初始化状态**，接受新的任务，处理等待队列中的任务（定义为-1）
 
 - SHUTDOWN：不接受新的任务提交，但是会继续处理等待队列中的任务（定义为0）
 
@@ -130,7 +132,7 @@ executor.execute(new RunnableTask());//重写execute方法
 
 ##### execute(Runnable command)方法
 
-​	若当前线程数 < 核心线程数 `addWorker(command, true)`后返回；
+​	若当前线程数 < 核心线程数 `addWorker(command, true)`创建新线程去执行任务，之后返回；
 
 ​	否则若线程池处于RUNNING状态，将command任务添加到任务队列`workQueue.offer(command)`
 
@@ -138,7 +140,7 @@ executor.execute(new RunnableTask());//重写execute方法
 >
 > 若线程池处于RUNNING状态 && 若线程数为0，则开启新线程`addWorker(null, false)`<!--担心任务提交到队列中了，但是线程都关闭了-->
 
-​	若 workQueue 队列满了，则以 maximumQueueSize 创建worker，失败则拒绝`reject(command)`
+​	若 workQueue 队列满了，则以 maximumQueueSize 创建新线程worker，失败则执行拒绝策略`reject(command)`
 
 ##### private boolean addWorker(Runnable firstTask, boolean core)方法
 
@@ -177,3 +179,19 @@ executor.execute(new RunnableTask());//重写execute方法
     - 线程池处于 SHUTDOWN，而且 workQueue 是空的，前面说了，这种不再接受新的任务
     - 线程池处于 STOP，不仅不接受新的线程，连 workQueue 中的线程也不再执行
 ```
+
+### 并发容器
+
+#### ConcurrentSkipListMap
+
+​	采用**跳表**（空间换时间）实现，跳表维护多个链表，链表分层，每上面一层链表都是下一层的子集。	
+
+> 与哈希算法实现Map的不同之处：哈希并不会保存元素的顺序，而跳表内所有的元素都是排序的。因此在对跳表进行遍历时，你会得到一个**有序**的结果。
+
+#### CopyonWriteArrayList
+
+
+
+#### BlockingQueue
+
+##### ArrayBlockingQueue
