@@ -208,22 +208,21 @@ public class Solution {
 ###### <font color="#FF0000">9.链表首尾翻转</font>
 
 ```java
-class Solution {
-    public static ListNode reverseList(ListNode head) {
-        if(head == null)return null;
+public static ListNode reverseList(ListNode head) {
+        if(head == null)return head;
         ListNode nhead = new ListNode(0);
         nhead.next = head;
         ListNode pre = head;
-        ListNode cur = head.next;
-        while(cur != null){
+        ListNode cur = null;
+    //空指针异常
+        while(pre.next != null){
+            cur = pre.next;
             pre.next = cur.next;
             cur.next = nhead.next;
             nhead.next = cur;
-            cur = pre.next;
         }
         return nhead.next;
     }
-}
 ```
 
 ###### <font color="#FF0000">10.合并两个已排序链表</font>
@@ -830,6 +829,213 @@ public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
             return right;
         }
         return null;
+    }
+```
+
+###### <span style="color : red">*30.两数相加（不用加减乘除）</span>
+
+```java
+public static int add(int a, int b){
+    while(b != 0){	//当进位不为0进入循环
+        int n = a ^ b;	//本位==a异或b
+        b = (a&b)>>1;	//进位==a与b**向左移位**
+        a = n;	//本位与进位相加
+    }
+    return a;
+}
+```
+
+###### <span style="color : red">*31.已知前序遍历和中序遍历，还原一棵二叉树</span>
+
+```java
+public TreeNode buildTree(int[] preorder, int[] inorder) {
+    if (preorder.length == 0)	return null;
+    TreeNode root = new TreeNode(preorder[0]);
+    int i = 0;
+    for (; i < inorder.length; i++){
+        if (root.val == inorder[i])	break;
+    }
+    int[] preleft = Arrays.copyOfRange(preorder,1,i+1);
+    int[] inleft = Arrays.copyOfRange(inorder,0,i);
+    int[] preright = Arrays.copyOfRange(preorder,i+1,preorder.length);
+    int[] inright = Arrays.copyOfRange(inorder,i+1,inorder.length);
+    root.left = buildTree(preleft, inleft);
+    root.right = buildTree(preright, inright);
+    return root;
+}
+```
+
+###### <span style="color : red">*32.矩阵中的路径	dfs/回溯</span>
+
+```java
+输入：board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "ABCCED"
+输出：true
+从任意一格开始，如果一条路径经过了矩阵的某一格，那么该路径不能再次进入该格子。
+```
+
+```java
+public boolean exist(char[][] board, String word) {
+        char[] words = word.toCharArray();
+        if (board.length == 0) return false;
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[0].length; j++) {
+                if (backTrack(i,j,0,board,words))   return true;
+            }
+        }
+        return false;
+    }
+    public boolean backTrack(int i, int j, int k, char[][] board, char[] words){
+        if (i<0||j<0||i>=board.length||j>=board[0].length||board[i][j]!=words[k]) return false;
+        if (k == words.length-1)  return true;
+        board[i][j] = '\0';	//做选择
+        boolean res = backTrack(i+1,j,k+1,board,words)||backTrack(i-1,j,k+1,board,words)||
+                backTrack(i,j+1,k+1,board,words)||backTrack(i,j-1,k+1,board,words);
+        board[i][j] = words[k];	//撤销选择
+        return res;
+    }
+```
+
+###### <span style="color : red">*33.机器人运动范围	dfs/回溯	bfs</span>
+
+```java
+地上有一个m行n列的方格，从坐标 [0,0] 到坐标 [m-1,n-1] 。一个机器人从坐标 [0, 0] 的格子开始移动，它每次可以向左、右、上、下移动一格（不能移动到方格外），也不能进入行坐标和列坐标的数位之和大于k的格子。例如，当k为18时，机器人能够进入方格 [35, 37] ，因为3+5+3+7=18。但它不能进入方格 [35, 38]，因为3+5+3+8=19。请问该机器人能够到达多少个格子？
+输入：m = 2, n = 3, k = 1
+输出：3
+```
+
+```java
+public int movingCount(int m, int n, int k) {
+        boolean[][] myArray = new boolean[m][n];
+        return robotBackTrack(m,n,0,0,k,myArray);
+    }
+	//DFS
+    public int robotBackTrack(int m, int n, int i, int j, int k,boolean[][] array){
+        if (i<0||j<0||i>=m||j>=n||((mySum(i)+mySum(j))>k)||array[i][j]) return 0;
+        array[i][j] = true;	//做选择
+        return 1+robotBackTrack(m,n,i+1,j,k,array)+robotBackTrack(m,n,i,j+1,k,array);
+    }
+    public int mySum(int num){
+        int sum = 0;
+        while (num != 0){
+            sum += num % 10;
+            num = num / 10;
+        }
+        return sum;
+    }
+```
+
+```java
+public int movingCount(int m, int n, int k) {
+        boolean[][] myArray = new boolean[m][n];
+        Queue<int[]> queue = new LinkedList<>();
+        int count = 0;
+    	//BFS
+        queue.offer(new int[]{0,0});
+        while (!queue.isEmpty()){
+            int[] out = queue.poll();
+            int i = out[0]; int j = out[1];
+            if (i<0||j<0||i>=m||j>=n||mySum(i)+mySum(j)>k||myArray[i][j]) continue;	//排除掉不符合的情况 不累加
+            myArray[i][j]=true;	//作标记
+            count++;
+            queue.offer(new int[]{i+1,j});	//向下
+            queue.offer(new int[]{i,j+1});	//向右
+        }
+        return count;
+    }
+    public int mySum(int num){
+        int sum = 0;
+        while (num != 0){
+            sum += num % 10;
+            num = num / 10;
+        }
+        return sum;
+    }
+```
+
+
+
+🐮客
+
+###### 34.链表中是否有环？
+
+```java
+public boolean hasCycle(ListNode head) {
+        if (head == null) return false;
+        ListNode fast = head;
+        ListNode slow = head;
+        while(fast!= null && fast.next != null){
+            fast = fast.next.next;
+            slow = slow.next;
+            if (fast == slow) return true;
+        }
+        return false;
+    }//快慢指针
+```
+
+###### 34拓展.环的入口节点
+
+```java
+对于一个给定的链表，返回环的入口节点，如果没有环，返回null
+```
+
+```java
+public ListNode detectCycle(ListNode head) {
+        if (hasCircle(head)){
+            ListNode fast = head, slow = head;
+            while (fast != null && fast.next != null){
+                fast = fast.next.next;
+                slow = slow.next;
+                if (fast == slow) break;
+            }
+            slow = head;	//指回头节点，按相同速度前进
+            while (fast != slow){
+                fast = fast.next;
+                slow = slow.next;
+            }
+            return fast;
+        }
+        return null;
+    }
+    public boolean hasCircle(ListNode head) {
+        ListNode fast = head, slow = head;
+        while (fast != null && fast.next != null){
+            fast = fast.next.next;
+            slow = slow.next;
+            if (fast == slow) return true;
+        }
+        return false;
+    }
+```
+
+###### 35.链表中的节点每k个一组翻转
+
+```java
+将给出的链表中的节点每  k 个一组翻转，返回翻转后的链表
+如果链表中的节点数不是 k 的倍数，将最后剩下的节点保持原样
+```
+
+```java
+public ListNode reverseKGroup (ListNode head, int k) {
+        if (head == null || head.next == null || k == 1) return head;
+        ListNode nhead = new ListNode(0);
+        nhead.next = head;
+        ListNode pre = head, cur = null, p = nhead;
+        int length = 0;
+        while (head != null){
+            head = head.next;
+            length++;
+        }
+        for (int i = 0; i < length/k; i++) {
+            for (int j = 1; j < k; j++) {
+                cur = pre.next;
+                pre.next = cur.next;
+                cur.next = p.next;
+                p.next = cur;
+            }
+            p = pre;
+            pre = pre.next;
+        }
+        return nhead.next;
     }
 ```
 

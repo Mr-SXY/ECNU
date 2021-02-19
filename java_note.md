@@ -2,13 +2,13 @@
 
 ​	Serializable接口中一个成员变量/函数都没有。
 
-​	序列化保存的是**对象**的状态，而不是类的状态，所以static修饰的变量都不保存。
+​	序列化保存的是**对象**的状态，而不是类的状态，所以static修饰的变量都不保存
 
-​	串行化保存的是变量的值，不保存变量的任何修饰符。
+​	串行化保存的是变量的值，不保存变量的任何修饰符
 
-​	transient关键字：阻止用该关键字的声明的变量持久化。
+​	transient关键字：阻止用该关键字的声明的变量持久化（序列化），transient **只能修饰变量，不能修饰类和方法**
 
-​	父类实现序列化，子类自动实现。
+​	父类实现序列化，子类自动实现
 
 ​	SerialVersionUID：
 
@@ -41,6 +41,16 @@ volatile int waitState 五种状态：
 ​	static final int PROPAGATE：-3	表示当前场景下后续的acquireShared能够执行；
 
 ​	默认状态：0	表示当前节点在sync queue中等待获取锁。
+
+#### Semaphore信号量
+
+指定多个线程同时访问某个资源。维持了一个可以获得许可证的数量，用于限制获取某个资源的线程数量。
+
+有两种模式，两个构造方法：公平和非公平
+
+#### CountDownLatch倒计时器
+
+​	允许count个线程阻塞在一个地方，直到所有线程任务执行完毕。
 
 
 
@@ -130,7 +140,9 @@ executor.execute(new RunnableTask());//重写execute方法
 
 ​	run()方法调用外部类的`runWorker()`方法。
 
-##### execute(Runnable command)方法
+##### 方法
+
+###### execute(Runnable command)
 
 ​	若当前线程数 < 核心线程数 `addWorker(command, true)`创建新线程去执行任务，之后返回；
 
@@ -142,15 +154,15 @@ executor.execute(new RunnableTask());//重写execute方法
 
 ​	若 workQueue 队列满了，则以 maximumQueueSize 创建新线程worker，失败则执行拒绝策略`reject(command)`
 
-##### private boolean addWorker(Runnable firstTask, boolean core)方法
+###### private boolean addWorker(Runnable firstTask, boolean core)
 
 > ​	第二个参数core为true表示采用 核心线程数corePoolSize 作为创建线程的界限；为false表示采用 最大线程数maximumPoolSize 为界限。
 
 - ​	进入外死循环：获取当前线程池状态，若线程池状态 >= SHUTDOWN并且**排除**线程池处于SHUTDOWN状态 && firstTask为null && workQueue非空 的情况。直接返回false
 
-- ​	进入内死循环：获取当前线程数，若线程数大于CAPACITY或大于core所指定的界限则直接返回false；若CAS增加线程数成功，跳出双重循环；若CAS失败判断线程池状态是否改变`runStateOf(c)!=rs`，若改变则回到外部循环。
+- ​	进入内死循环：获取当前线程数，若线程数大于CAPACITY或大于core所指定的界限则直接返回false；若CAS增加线程数成功，跳出双重循环；若CAS失败判断线程池状态是否改变`runStateOf(c)!=rs`，若改变则回到外部循环。继续往下走：
 
-  创建worker启动标志位workerStarted、成功加入workers HashSet的标志位workerAdded。获得线程池的全局锁ReentrantLock mainLock 、根据firstTask创建Worker，获得`worker.thread`。
+  ​    创建worker启动标志位workerStarted、成功加入workers HashSet的标志位workerAdded。获得线程池的全局锁ReentrantLock mainLock 、根据firstTask创建Worker，获得`worker.thread`;
 
   ​	当该线程不为null时,`mainLock.lock()`进行操作：若线程池状态小于SHUTDOWN（running） or 等于SHUTDOWN且firstTask为null，（判断之前worker的thread是否已启动，已启动抛出异常）将worker加入workers的HashSet中，获得`workers.size()`并用largestPoolSize记录最大size值。设workerAdded为true。最后`mainLock.unlock()`;
 
@@ -160,15 +172,15 @@ executor.execute(new RunnableTask());//重写execute方法
 
   返回workerStarted状态。
 
-##### addWorkerFailed(Worker w)方法
+###### addWorkerFailed(Worker w)
 
 ​	获得线程池锁mainLock并加锁`mainLock.lock()`，若传入的Worker w 不为空则移除`workers.remove(w)`;`decrementWorkerCount()`WorkerCount减一；tryTerminate()后unlock()。
 
-##### final void runWorker(Worker w)方法
+###### final void runWorker(Worker w)
 
 ​	获取w的firstTask，**若不为空 or `getTask()`返回不为null**进入**循环**，w上锁，若线程池状态大于STOP则中断当前线程，执行任务`task.run()`,后task指null，completedTasks累加并释放锁。
 
-##### private Runnable getTask()方法
+###### private Runnable getTask()
 
 ```java
 1. 阻塞直到获取到任务返回。我们知道，默认 corePoolSize 之内的线程是不会被回收的，
@@ -190,8 +202,8 @@ executor.execute(new RunnableTask());//重写execute方法
 
 #### CopyonWriteArrayList
 
-
+#### ConcurrentLinkedQueue
 
 #### BlockingQueue
 
-##### ArrayBlockingQueue
+##### 	ArrayBlockingQueue
