@@ -24,7 +24,18 @@ new InterfaceName(parameters){
 
 看起来像是实例化接口，但其实只是省略的写法。
 
+### 优先队列`PriorityQueue`（堆）
 
+```java
+PriorityQueue<Integer> pq = new PriorityQueue<>(new Comparator<Integer>() {
+    public int compare(Integer o1, Integer o2){
+        return o1-o2;	//升序排列，小顶堆
+        return o2-o1;	//降序排列，大顶堆
+    }
+});
+```
+
+​	`Comparator`是函数式接口：即仅有一个**抽象**方法，`java8`中引入了default关键字，可在接口编写`default`方法以及`static`方法，该类方法需要有`body`具体方法体。
 
 ### AQS线程
 
@@ -207,3 +218,21 @@ executor.execute(new RunnableTask());//重写execute方法
 #### BlockingQueue
 
 ##### 	ArrayBlockingQueue
+
+
+
+### 容器
+
+#### ArraryList
+
+#### LinkedList
+
+#### HashTable
+
+#### HashMap
+
+#### ConcurrentHashMap
+
+
+
+### ThreadLocal
