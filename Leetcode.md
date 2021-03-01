@@ -1,17 +1,19 @@
-###### 1.翻转二叉树
+###### 1.翻转二叉树/二叉树的镜像
 
-> 输入：
-> 	4
->    /   \
->   2     7
->  / \   / \
-> 1   3 6   9
-> 输出：
-> 	4
->    /   \
->   7     2
->  / \   / \
-> 9   6 3   1
+```
+输入：
+ 4
+/   \
+2     7
+/ \   / \
+1   3 6   9
+输出：
+ 4
+/   \
+7     2
+/ \   / \
+9   6 3   1
+```
 
 ​	有三种实现方式：栈、队列、递归。
 
@@ -81,9 +83,10 @@ public TreeNode invertTree(TreeNode node){
 }
 ```
 
-###### 2.用两个栈实现一个队列。
+###### 2.用两个栈实现一个队列
 
-​	队列的声明如下，请实现它的两个函数 appendTail 和 deleteHead ，分别完成在队列尾部插入整数和在队列头部删除整数的功能。(若队列中没有元素，deleteHead 操作返回 -1 )
+> ​	队列的声明如下，请实现它的两个函数 appendTail 和 deleteHead ，分别完成在队列尾部插入整数和在队列头部删除整数的功能。(若队列中没有元素，deleteHead 操作返回 -1 )
+>
 
 ```java
 class CQueue {
@@ -98,7 +101,6 @@ class CQueue {
     public void appendTail(int value) {
         stack1.push(value);
     }
-
     public int deleteHead() {
         if (!stack2.isEmpty()){
             return stack2.pop();
@@ -134,11 +136,12 @@ class Solution {
 
 ###### <font color="#FF0000">*4.二维数组中的查找</font>
 
- [1,   4,  7, 11, 15],			每一行都按照从左到右递增的顺序排序，每一列都按照从上到下递增的顺序排序。
-  [2,   5,  8, 12, 19],			完成一个函数，输入一个二维数组和一个整数，判断数组中是否含有该整数。
-  [3,   6,  9, 16, 22],
-  [10, 13, 14, 17, 24],
-  [18, 21, 23, 26, 30]
+>  [1,   4,  7, 11, 15],			
+>   [2,   5,  8, 12, 19],			
+>   [3,   6,  9, 16, 22],
+>   [10, 13, 14, 17, 24],
+>   [18, 21, 23, 26, 30]
+> 每一行都按照从左到右递增的顺序排序，每一列都按照从上到下递增的顺序排序。完成一个函数，输入一个二维数组和一个整数，判断数组中是否含有该整数。
 
 ```java
 class Solution {
@@ -188,6 +191,30 @@ class Solution {
 ```
 
 ###### 7.二分查找
+
+> 请实现有重复数字的升序数组的二分查找。
+> 输出在数组中第一个大于等于查找值的位置，如果数组中不存在这样的数，则输出数组长度加一。
+> 输入：5,4,[1,2,4,4,5]
+> 输出：3
+
+```java
+public int upper_bound_ (int n, int v, int[] a) {	//n:数组a长度；v查找值
+        if (a[n-1]<v) return n+1;
+        int mid = 0,index = 0;
+        int head = 0;
+        int tail = n-1;
+        while(head<tail){
+            mid = (tail-head)/2+head;
+            if (a[mid]>=v) {
+                tail = mid;
+                index = tail;
+            }else {
+                head = mid+1;	//加一，否则死循环
+            }
+        }
+        return index+1;
+    }
+```
 
 ###### 8.二进制中1的个数
 
@@ -250,21 +277,21 @@ class Solution {
 
 ###### <font color="#FF0000">*11.判断对称二叉树</font>
 
-> 二叉树 [1,2,2,3,4,4,3] 是对称的。
->
-> ​	1
->   / \
->  2  2
->  / \ / \
-> 3  4 4  3
->
-> [1,2,2,null,3,null,3] 则不是镜像对称的:
->
-> ​	1
->   / \
->  2  2
->   \  	\
->   3   	3
+```
+二叉树 [1,2,2,3,4,4,3] 是对称的。
+ 1
+/ \
+2  2
+/ \ / \
+3  4 4  3
+
+[1,2,2,null,3,null,3] 则不是镜像对称的:
+ 1
+/ \
+2  2
+\  	\
+3   	3
+```
 
 ```java
 class Solution {
@@ -425,37 +452,32 @@ public static List<List<Integer>> TreeOrder(TreeNode root){
 
 ###### *16.数组最小的k个数	<font color="#FF0000">**大顶堆**</font>
 
-```
-输入：arr = [3,2,1], k = 2
-输出：[1,2] 或者 [2,1]
-```
+> 输入：arr = [3,2,1], k = 2
+> 输出：[1,2] 或者 [2,1]
 
 ```java
 public int[] getLeastNumbers(int[] arr, int k) {
-        int[] newArr = new int[k];
-        if (arr.length == 0)    return new int[0];
-        for (int gap = arr.length / 2; gap > 0; gap /= 2){	//shell排序
-            for (int i = gap; i < arr.length; i++) {
-                int temp = arr[i];
-                int j = i;
-                for (; j >= gap && temp < arr[j - gap]; j -= gap)
-                    arr[j] = arr[j - gap];
-                arr[j] = temp;
+       int[] res = new int[k];
+        PriorityQueue<Integer> priorityQueue = new PriorityQueue<>(new Comparator<Integer>(){
+            public int compare(Integer o1, Integer o2){
+                return o1-o2;
             }
+        });
+        for (int i = 0; i < arr.length; i++) {
+            priorityQueue.add(arr[i]);
         }
-        for (int i = 0; i < k; i++)
-            newArr[i] = arr[i];
-        return newArr;
+        for (int i = 0; i < k; i++) {
+            res[i] = priorityQueue.poll();
+        }
+        return res;
     }
 ```
 
 ###### *17.连续子数组的最大和	<font color="#FF0000">**动态规划**</font>
 
-```
-输入: nums = [-2,1,-3,4,-1,2,1,-5,4]
-输出: 6
-解释: 连续子数组 [4,-1,2,1] 的和最大，为 6。
-```
+> 输入: nums = [-2,1,-3,4,-1,2,1,-5,4]
+> 输出: 6
+> 解释: 连续子数组 [4,-1,2,1] 的和最大，为 6。
 
 ```java
 public int maxSubArray(int[] nums) {
@@ -477,15 +499,11 @@ public int maxSubArray(int[] nums) {
 
 ###### *18.第一个只出现一次的字符	**HashMap**
 
-字符串 s 中找出第一个只出现一次的字符。如果没有，返回一个单空格。 s 只包含小写字母。
-
-```
-s = "abaccdeff"
-返回 "b"
-
-s = "" 
-返回 " "
-```
+> 字符串 s 中找出第一个只出现一次的字符。如果没有，返回一个单空格。 s 只包含小写字母。
+> 输入s = "abaccdeff"
+> 返回 "b"
+> 输入s = "" 
+> 返回 " "
 
 ```java
 public static char firstUniqChar(String s) {
@@ -577,7 +595,7 @@ public int kthLargest(TreeNode root, int k) {
     }
 ```
 
-###### <font color="#FF0000">*21.二叉树的深度</font>
+###### <font color="#FF0000">*21.二叉树的最大深度</font>
 
 ```java
  public int maxDepth(TreeNode root) {
@@ -621,10 +639,8 @@ public boolean isBalanced(TreeNode root) {
 
 ###### <font color="#FF0000">*24.和为s的连续正数序列</font>	**滑动窗口法**
 
-```java
-输入：target = 15
-输出：[[1,2,3,4,5],[4,5,6],[7,8]]
-```
+> 输入：target = 15
+> 输出：[[1,2,3,4,5],[4,5,6],[7,8]]
 
 ```java
 /*采用双指针移动
@@ -693,17 +709,11 @@ public String reverseWords(String s) {
 
 ###### *26.扑克牌中的顺子	HashSet判断重复
 
-​	从扑克牌中随机抽5张牌，判断是不是一个顺子，即这5张牌是不是连续的。2～10为数字本身，A为1，J为11，Q为12，K为13，而大、小王为 0 ，可以看成任意数字。A 不能视为 14。
-
-```java
-输入: [1,2,3,4,5]
-输出: True
-```
-
-```java
-输入: [0,0,1,2,5]
-输出: True
-```
+> 从扑克牌中随机抽5张牌，判断是不是一个顺子，即这5张牌是不是连续的。2～10为数字本身，A为1，J为11，Q为12，K为13，而大、小王为 0 ，可以看成任意数字。A 不能视为 14。
+> 输入: [1,2,3,4,5]
+> 输出: True
+> 输入: [0,0,1,2,5]
+> 输出: True
 
 ```java
 public static boolean isStraight(int[] nums) {
@@ -724,15 +734,11 @@ public static boolean isStraight(int[] nums) {
 
 ###### <span style="color : red">*27.圆圈中最后剩下的数字		**约瑟夫环**</span>
 
-0、1、2、3、4这5个数字组成一个圆圈，从数字0开始每次删除第3个数字，则删除的前4个数字依次是2、0、4、1，因此最后剩下的数字是3。
-
-```
-输入: n = 5, m = 3
-输出: 3
-
-输入: n = 10, m = 17
-输出: 2
-```
+> 0、1、2、3、4这5个数字组成一个圆圈，从数字0开始每次删除第3个数字，则删除的前4个数字依次是2、0、4、1，因此最后剩下的数字是3。
+> 输入: n = 5, m = 3
+> 输出: 3
+> 输入: n = 10, m = 17
+> 输出: 2
 
 ```java
 public static int lastRemaining(int n, int m) {
@@ -770,19 +776,16 @@ res=(res+m)%n		  n				  数组后面加上数组的复制来体现*环状*
 
 ###### <span style="color : red">*28.二叉搜索树的最近公共祖先</span>
 
-```
-输入: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 8
-输出: 6 
-解释: 节点 2 和节点 8 的最近公共祖先是 6。
-
-输入: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 4
-输出: 2
-解释: 节点 2 和节点 4 的最近公共祖先是 2, 因为根据定义最近公共祖先节点可以为节点本身。
-
-说明：
-·所有节点的值都是唯一的。
-·p、q 为不同节点且均存在于给定的二叉搜索树中。
-```
+> 输入: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 8
+> 输出: 6 
+> 解释: 节点 2 和节点 8 的最近公共祖先是 6。
+> 输入: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 4
+> 输出: 2
+> 解释: 节点 2 和节点 4 的最近公共祖先是 2, 因为根据定义最近公共祖先节点可以为节点本身。
+>
+> 说明：
+> ·所有节点的值都是唯一的。
+> ·p、q 为不同节点且均存在于给定的二叉搜索树中。
 
 ```java
 public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
@@ -804,9 +807,7 @@ public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
 
 ###### <span style="color : red">*29.二叉树的最近公共祖先</span>
 
-```
-BST推广到普通二叉树
-```
+> BST推广到普通二叉树
 
 ```java
 public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
@@ -867,11 +868,9 @@ public TreeNode buildTree(int[] preorder, int[] inorder) {
 
 ###### <span style="color : red">*32.矩阵中的路径	dfs/回溯</span>
 
-```java
-输入：board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "ABCCED"
-输出：true
-从任意一格开始，如果一条路径经过了矩阵的某一格，那么该路径不能再次进入该格子。
-```
+> 输入：board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "ABCCED"
+> 输出：true
+> 从任意一格开始，如果一条路径经过了矩阵的某一格，那么该路径不能再次进入该格子。
 
 ```java
 public boolean exist(char[][] board, String word) {
@@ -897,11 +896,9 @@ public boolean exist(char[][] board, String word) {
 
 ###### <span style="color : red">*33.机器人运动范围	dfs/回溯	bfs</span>
 
-```java
-地上有一个m行n列的方格，从坐标 [0,0] 到坐标 [m-1,n-1] 。一个机器人从坐标 [0, 0] 的格子开始移动，它每次可以向左、右、上、下移动一格（不能移动到方格外），也不能进入行坐标和列坐标的数位之和大于k的格子。例如，当k为18时，机器人能够进入方格 [35, 37] ，因为3+5+3+7=18。但它不能进入方格 [35, 38]，因为3+5+3+8=19。请问该机器人能够到达多少个格子？
-输入：m = 2, n = 3, k = 1
-输出：3
-```
+> 地上有一个m行n列的方格，从坐标 [0,0] 到坐标 [m-1,n-1] 。一个机器人从坐标 [0, 0] 的格子开始移动，它每次可以向左、右、上、下移动一格（不能移动到方格外），也不能进入行坐标和列坐标的数位之和大于k的格子。例如，当k为18时，机器人能够进入方格 [35, 37] ，因为3+5+3+7=18。但它不能进入方格 [35, 38]，因为3+5+3+8=19。请问该机器人能够到达多少个格子？
+> 输入：m = 2, n = 3, k = 1
+> 输出：3
 
 ```java
 public int movingCount(int m, int n, int k) {
@@ -974,9 +971,7 @@ public boolean hasCycle(ListNode head) {
 
 ###### 34拓展.环的入口节点
 
-```java
-对于一个给定的链表，返回环的入口节点，如果没有环，返回null
-```
+> 对于一个给定的链表，返回环的入口节点，如果没有环，返回null
 
 ```java
 public ListNode detectCycle(ListNode head) {
@@ -1009,10 +1004,8 @@ public ListNode detectCycle(ListNode head) {
 
 ###### 35.链表中的节点每k个一组翻转
 
-```java
-将给出的链表中的节点每  k 个一组翻转，返回翻转后的链表
-如果链表中的节点数不是 k 的倍数，将最后剩下的节点保持原样
-```
+> 将给出的链表中的节点每  k 个一组翻转，返回翻转后的链表
+> 如果链表中的节点数不是 k 的倍数，将最后剩下的节点保持原样
 
 ```java
 public ListNode reverseKGroup (ListNode head, int k) {
@@ -1036,6 +1029,515 @@ public ListNode reverseKGroup (ListNode head, int k) {
             pre = pre.next;
         }
         return nhead.next;
+    }
+```
+
+###### 36.LRU缓存设计
+
+> 设计LRU缓存结构，该结构在构造时确定大小，假设大小为K，并有如下两个功能
+> set(key, value)：将记录(key, value)插入该结构
+> get(key)：返回key对应的value值
+> [要求]
+> 	set和get方法的时间复杂度为O(1)
+> 	某个key的set或get操作一旦发生，认为这个key的记录成了最常使用的。
+> 	当缓存的大小超过K时，移除最不经常使用的记录，即set或get最久远的。
+> 若opt=1，接下来两个整数x, y，表示set(x, y)
+> 若opt=2，接下来一个整数x，表示get(x)，若x未出现过或已被移除，则返回-1
+> 对于每个操作2，输出一个答案
+
+```java
+class LRU {
+    //通过 HashMap+双向链表 实现
+    private class DLinkedNode {
+        int key;
+        int value;
+        DLinkedNode pre;
+        DLinkedNode next;
+        public DLinkedNode(){}
+        public DLinkedNode(int key, int value){
+            this.key = key;
+            this.value = value;
+        }
+    }
+   private HashMap<Integer,DLinkedNode> map = new HashMap<>();
+   private DLinkedNode head = new DLinkedNode(-1,-1);
+   private DLinkedNode tail = new DLinkedNode(-1,-1);
+   private int k;
+    public int[] LRU(int[][] operators, int k) {
+        this.k = k;
+        head.next = tail;
+        tail.pre = head;
+        int len = (int)Arrays.stream(operators).filter(x -> x[0] == 2).count();
+        //stream操作
+        int[] res = new int[len];
+       for (int i = 0, j = 0; i < operators.length; i++){
+            if (operators[i][0]==1){
+                put(operators[i][1],operators[i][2]);
+            }else {
+                res[j++] = get(operators[i][1]);
+            }
+        }
+        return res;
+    }
+    
+    public int get(int key) {
+        if (map.containsKey(key)){
+            DLinkedNode node = map.get(key);
+            node.pre.next = node.next;
+            node.next.pre = node.pre;
+            //放到头节点之后
+            node.next = head.next;
+            head.next.pre = node;
+            head.next = node;
+            node.pre = head;
+            return node.value;
+        }else {
+            return -1;
+        }
+    }
+    public void put(int key, int value) {
+        if (map.containsKey(key)){
+            map.get(key).value = value;
+            DLinkedNode node = map.get(key);
+            node.pre.next = node.next;
+            node.next.pre = node.pre;
+            //放到头节点之后
+            node.next = head.next;
+            head.next.pre = node;
+            head.next = node;
+            node.pre = head;
+        }else {
+            if (map.size() == k){
+                int tempkey = tail.pre.key;
+                tail.pre.pre.next = tail;
+                tail.pre = tail.pre.pre;
+                map.remove(tempkey);
+            }
+            DLinkedNode node = new DLinkedNode(key,value);
+            node.next = head.next;
+            head.next.pre = node;
+            head.next = node;
+            node.pre = head;
+            map.put(key,node);
+        }
+    }
+}
+```
+
+###### 37.二叉树的先序、中序，后序遍历
+
+> 输出成一个二维数组
+
+```java
+List<Integer> prelist = new ArrayList<>();
+List<Integer> inlist = new ArrayList<>();
+List<Integer> afterlist = new ArrayList<>();
+public int[][] threeOrders (TreeNode root) {
+    int[][] array = {preOrder(root),
+                     inOrder(root),
+                     afterOrder(root)};
+    return array;
+}
+public int[] preOrder (TreeNode root) {
+    if (root == null) return null;
+    prelist.add(root.val);
+    preOrder(root.left);
+    preOrder(root.right);
+    int[] res = new int[prelist.size()];
+    for (int i = 0; i < prelist.size(); i++) {
+        res[i] = prelist.get(i);
+    }
+    return res;
+}
+public int[] inOrder (TreeNode root) {
+    if (root == null) return null;
+    inOrder(root.left);
+    inlist.add(root.val);
+    inOrder(root.right);
+    int[] res = new int[inlist.size()];
+    for (int i = 0; i < inlist.size(); i++) {
+        res[i] = inlist.get(i);
+    }
+    return res;
+}
+public int[] afterOrder (TreeNode root) {
+    if (root == null) return null;
+    afterOrder(root.left);
+    afterOrder(root.right);
+    afterlist.add(root.val);
+    int[] res = new int[afterlist.size()];
+    for (int i = 0; i < afterlist.size(); i++) {
+        res[i] = afterlist.get(i);
+    }
+    return res;
+}
+```
+
+###### 38.据二叉树的前序遍历，中序遍历恢复二叉树，并打印出二叉树的右视图
+
+```java
+public int[] solve (int[] xianxu, int[] zhongxu) {
+        return rightSeen(back(xianxu,zhongxu));
+    }
+//恢复二叉树
+    public TreeNode back (int[] pre, int[] in){
+        if (pre.length==0||in.length==0) return null;
+        TreeNode root = new TreeNode(pre[0]);
+        int i;
+        for (i = 0; i < in.length; i++){
+            if (in[i]==pre[0]) break;
+        }
+        int[] leftpre = Arrays.copyOfRange(pre,1,i+1);
+        int[] rightpre = Arrays.copyOfRange(pre,i+1,pre.length);
+        int[] leftin = Arrays.copyOfRange(in,0,i);
+        int[] rightin = Arrays.copyOfRange(in,i+1,in.length);
+        root.left = back(leftpre,leftin);
+        root.right = back(rightpre,rightin);
+        return root;
+    }
+//输出右视图
+    public int[] rightSeen (TreeNode root){
+        if (root==null) return null;
+        Queue<TreeNode> queue = new LinkedList<>();
+        List<Integer> res = new ArrayList<>();
+        queue.offer(root);
+        while (!queue.isEmpty()){
+            TreeNode temp = root;
+            for (int i = queue.size(); i > 0; i--){
+                temp = queue.poll();
+                if (temp.left!=null) queue.offer(temp.left);
+                if (temp.right!=null) queue.offer(temp.right);
+            }
+            res.add(temp.val);
+        }
+        return res.stream().mapToInt(Integer::intValue).toArray();	//list to array
+    }
+```
+
+###### 39.二叉树 之 字搜索
+
+```java
+public ArrayList<ArrayList<Integer>> zigzagLevelOrder (TreeNode root) {
+        Queue<TreeNode> queue = new LinkedList<>();
+        ArrayList<ArrayList<Integer>> res = new ArrayList<>();
+        if (root==null)    return res;
+        int floor = 1;
+        queue.offer(root);
+        while (!queue.isEmpty()){
+            ArrayList<Integer> ceng = new ArrayList<>();
+            for (int size = queue.size(); size > 0; size--){
+                TreeNode temp = queue.poll();
+                //将弹出节点的左右节点入队，而不是root左右节点。
+                ceng.add(temp.val);
+                if (temp.left!=null) queue.offer(temp.left);
+                if (temp.right!=null) queue.offer(temp.right);
+            }
+            //正常层序遍历后翻转输出
+            if (floor%2==0) Collections.reverse(ceng);
+            res.add(ceng);
+            floor++;
+        }
+        return res;
+    }
+```
+
+###### 40.数组中最长无重复子数组的长度
+
+```java
+public int maxLength (int[] arr) {
+        HashMap<Integer,Integer> map = new HashMap<>();
+        int left = 0,right = 0,maxLength = 0;
+        for (; right < arr.length; right++){
+            if (map.containsKey(arr[right])){
+                left = Math.max(left,map.get(arr[right])+1);	//[1,3,4,3,4]	left指向重复数的下一个，保证left，right之间无重复元素
+            }
+            maxLength = Math.max(maxLength,right-left+1);	//新一轮子数组长度 大于 上一轮，取最大
+            map.put(arr[right],right);
+        }
+        return maxLength;
+    }
+```
+
+###### 41.合并K个已排序链表
+
+> 输入：[{1,2,3},{4,5,6,7}]
+> 输出：{1,2,3,4,5,6,7}
+
+```java
+//归并思想 + 递归
+public ListNode mergeKLists(ArrayList<ListNode> lists) {
+        if (lists.size()<=0) return null;
+        ArrayList<ListNode> temp = new ArrayList<>();
+        if (lists.size()==1) return lists.get(0);
+        if (lists.size()%2!=0) lists.add(null);	//如果list大小为奇数，补成偶数
+        for (int i = 0; i < lists.size(); i=i+2){
+            temp.add(mergeTwoLists(lists.get(i),lists.get(i+1)));
+        }
+        return mergeKLists(temp);
+    }
+//基于	合并两个已排序链表
+    public ListNode mergeTwoLists(ListNode l1, ListNode l2){
+        ListNode head = new ListNode(-1);
+        ListNode p = head;
+        while ((l1!=null)&&(l2!=null)){
+            if (l1.val>l2.val){
+                p.next = l2;
+                l2 = l2.next;
+            }else {
+                p.next = l1;
+                l1 = l1.next;
+            }
+            p = p.next;
+        }
+        if (l1==null) p.next = l2;
+        else p.next = l1;
+        return head.next;
+    }
+```
+
+###### 42.两个链表生成相加链表
+
+```java
+//翻转链表后相加
+public ListNode addInList (ListNode head1, ListNode head2) {
+    ListNode nhead1 = reverseList(head1);
+    ListNode nhead2 = reverseList(head2);
+    ListNode nhead = new ListNode(-1);
+    ListNode p = nhead;
+    int carry = 0;	//进位
+    //相加
+    while (nhead1!=null||nhead2!=null){
+        int standard = carry;	//每次 本位 设置等于进位
+        if (nhead1!=null){
+            standard += nhead1.val;
+            nhead1 = nhead1.next;
+        }
+        if (nhead2!=null){
+            standard += nhead2.val;
+            nhead2 = nhead2.next;
+        }
+        p.next = new ListNode(standard%10);
+        p = p.next;
+        carry = standard/10;
+    }
+    if (carry>0){
+        p.next = new ListNode(carry);
+    }
+    return reverseList(nhead.next);
+}
+public ListNode reverseList(ListNode head){
+    ListNode nhead = new ListNode(-1);
+    ListNode cur = null, pre = head;
+    nhead.next = head;
+    while (pre.next!=null){
+        cur = pre.next;
+        pre.next = cur.next;
+        cur.next = nhead.next;
+        nhead.next = cur;
+    }
+        return nhead.next;
+    }
+```
+
+###### 43.删除链表的倒数第n个节点
+
+```java
+//翻转链表后删除
+public ListNode removeNthFromEnd (ListNode head, int n) {
+    if (n==0) return head;
+    if (head.next==null) return null;
+    head = reverseList(head);
+    ListNode p = head;
+    if (n==1) return reverseList(head.next);
+    for (int i = 1;i < n-1; i++){
+        p = p.next;
+    }
+    p.next = p.next.next;
+    return reverseList(head);
+}
+public ListNode reverseList(ListNode head){
+    ListNode nhead = new ListNode(-1);
+    ListNode cur = null, pre = head;
+    nhead.next = head;
+    while (pre.next!=null){
+        cur = pre.next;
+        pre.next = cur.next;
+        cur.next = nhead.next;
+        nhead.next = cur;
+    }
+    return nhead.next;
+}
+```
+
+###### 44.两个字符串的最长公共子串（连续）
+
+```java
+public String LCS (String str1, String str2) {
+    int[][] dp = new int[str1.length()][str2.length()];
+    //二维数组，str1为行，str2为列
+    int maxlength = 0, tail = 0;
+    for (int i = 0; i < str1.length(); i++){
+        for (int j = 0; j < str2.length(); j++){
+            if (str1.charAt(i)==str2.charAt(j)){
+                if (i==0||j==0) dp[i][j] = 1;
+                else{
+                    dp[i][j] = dp[i-1][j-1]+1;
+                }
+                if (dp[i][j]>maxlength){
+                    maxlength = dp[i][j];
+                    tail = i;
+                }
+            }else{
+                dp[i][j] = 0;
+            }
+        }
+    }
+    return str1.substring(tail-maxlength+1,tail+1);	//左闭右开
+}
+```
+
+###### 	45.两个字符串的最长公共子序列（不连续）
+
+> 给定两个字符串 `text1` 和 `text2`，返回这两个字符串的最长公共子序列的长度。
+> 输入：text1 = "abcde", text2 = "ace" 
+> 输出：3
+> 解释：最长公共子序列是 "ace"，它的长度为 3。
+
+```java
+public int longestCommonSubsequence(String text1, String text2) {
+        int length1 = text1.length()+1, length2 = text2.length()+1;
+        int[][] dp = new int[length1][length2];
+        //int maxlength = 0;
+        for (int j = 0; j < length2; j++){
+            dp[0][j] = 0;
+        }
+        for (int i = 0; i < length1; i++){
+            dp[i][0] = 0;
+        }
+        for (int i = 1; i < length1; i++){
+            for (int j = 1; j < length2; j++){
+                if (text1.charAt(i-1)==text2.charAt(j-1)){
+                    dp[i][j] = dp[i-1][j-1]+1;
+                }else{
+                    dp[i][j] = Math.max(dp[i-1][j],dp[i][j-1]);
+                }
+                //maxlength = dp[i][j]>maxlength?dp[i][j]:maxlength;
+            }
+        }
+        //return maxlength;
+        return dp[length1-1][length2-1];
+    }
+```
+
+
+
+
+
+#### 排序
+
+```java
+//快排 递归+分治
+public int[] MySort (int[] arr) {
+    fastSort(arr,0,arr.length-1);
+    return arr;
+}
+public void fastSort (int[] array,int start, int length) {
+    if (start>=length)  return;
+    int p = exchange(array,start,length);	//返回array[0]的新位置
+    fastSort(array,start,p-1);	//对p左边部分进行同样操作
+    fastSort(array,p+1,length);
+}
+public int exchange(int[] array, int start, int last) {
+    int temp = array[start];	//取array[0]为比较基准，小于temp的放左边，大于的放右边。
+    int i = start;
+    int j = last+1;
+    while (true) {
+        while (array[++i]<temp){
+            if (i==last) break;
+        }
+        while (array[--j]>temp){
+            if (j==start) break;
+        }
+        if (i>=j) break;
+        swap(array,i,j);
+    }
+    swap(array,start,j);
+    return j;	//为什么返回j，不是i
+}
+public void swap(int[] array, int i, int j){
+    int temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+}
+```
+
+##### 利用快排找出数组中第K大的数
+
+```java
+public int findKth(int[] a, int n, int K) {
+        if (K>n) return -1;
+        fastSort(a,0,n-1,K);
+        return a[K-1];
+    }
+    public void fastSort (int[] array, int start, int last, int K){
+        if (start>last) return;
+        int p = exchange(array,start,last);
+        if (p>K-1){	//剪枝
+            fastSort(array,0,p-1,K);
+        }else {
+            fastSort(array,p+1,last,K);
+        }
+    }
+    public int exchange(int[] array, int start, int last){
+        int temp = array[start];
+        int i = start;
+        int j = last+1;
+        while (true){
+            while(array[++i]>temp){
+                if (i>=last) break;
+            }
+            while(array[--j]<temp){
+                if (j<=start) break;
+            }
+            if (i>=j) break;
+            swap(array,i,j);
+        }
+        swap(array,start,j);
+        return j;
+    }
+    public void swap(int[] array, int i, int j){
+        int temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+```
+
+
+
+```java
+//堆排
+
+```
+
+
+
+```java
+//16题shell排序
+public int[] getLeastNumbers(int[] arr, int k) {
+        int[] newArr = new int[k];
+        if (arr.length == 0)    return new int[0];
+        for (int gap = arr.length / 2; gap > 0; gap /= 2){	//shell排序
+            for (int i = gap; i < arr.length; i++) {
+                int temp = arr[i];
+                int j = i;
+                for (; j >= gap && temp < arr[j - gap]; j -= gap)
+                    arr[j] = arr[j - gap];
+                arr[j] = temp;
+            }
+        }
+        for (int i = 0; i < k; i++)
+            newArr[i] = arr[i];
+        return newArr;
     }
 ```
 
