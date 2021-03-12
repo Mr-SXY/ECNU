@@ -199,20 +199,18 @@ class Solution {
 
 ```java
 public int upper_bound_ (int n, int v, int[] a) {	//n:数组a长度；v查找值
-        if (a[n-1]<v) return n+1;
-        int mid = 0,index = 0;
-        int head = 0;
-        int tail = n-1;
-        while(head<tail){
-            mid = (tail-head)/2+head;
-            if (a[mid]>=v) {
-                tail = mid;
-                index = tail;
-            }else {
-                head = mid+1;	//加一，否则死循环
+        if (v>a[n-1]) return n+1;
+        int left = 0, right = n-1;
+        int mid = (right-left)/2+1;
+        while (left!=right){
+            if (a[mid]>=v){
+                right = mid;
+            }else{
+                left = mid+1;	//加一，否则死循环
             }
+            mid = (right-left)/2+left;
         }
-        return index+1;
+        return mid+1;
     }
 ```
 
@@ -896,7 +894,9 @@ public boolean exist(char[][] board, String word) {
 
 ###### <span style="color : red">*33.机器人运动范围	dfs/回溯	bfs</span>
 
-> 地上有一个m行n列的方格，从坐标 [0,0] 到坐标 [m-1,n-1] 。一个机器人从坐标 [0, 0] 的格子开始移动，它每次可以向左、右、上、下移动一格（不能移动到方格外），也不能进入行坐标和列坐标的数位之和大于k的格子。例如，当k为18时，机器人能够进入方格 [35, 37] ，因为3+5+3+7=18。但它不能进入方格 [35, 38]，因为3+5+3+8=19。请问该机器人能够到达多少个格子？
+> 地上有一个m行n列的方格，
+>
+> 从坐标 [0,0] 到坐标 [m-1,n-1] 。一个机器人从坐标 [0, 0] 的格子开始移动，它每次可以向左、右、上、下移动一格（不能移动到方格外），也不能进入行坐标和列坐标的数位之和大于k的格子。例如，当k为18时，机器人能够进入方格 [35, 37] ，因为3+5+3+7=18。但它不能进入方格 [35, 38]，因为3+5+3+8=19。请问该机器人能够到达多少个格子？
 > 输入：m = 2, n = 3, k = 1
 > 输出：3
 
@@ -1019,7 +1019,7 @@ public ListNode reverseKGroup (ListNode head, int k) {
             length++;
         }
         for (int i = 0; i < length/k; i++) {
-            for (int j = 1; j < k; j++) {
+            for (int j = 1; j < k; j++) {	//每K个一组翻转，操作K-1次
                 cur = pre.next;
                 pre.next = cur.next;
                 cur.next = p.next;
@@ -1241,7 +1241,7 @@ public ArrayList<ArrayList<Integer>> zigzagLevelOrder (TreeNode root) {
     }
 ```
 
-###### 40.数组中最长无重复子数组的长度
+###### 40.数组中最长无重复子数组的长度 (连续)
 
 ```java
 public int maxLength (int[] arr) {
@@ -1407,29 +1407,236 @@ public String LCS (String str1, String str2) {
 public int longestCommonSubsequence(String text1, String text2) {
         int length1 = text1.length()+1, length2 = text2.length()+1;
         int[][] dp = new int[length1][length2];
-        //int maxlength = 0;
-        for (int j = 0; j < length2; j++){
-            dp[0][j] = 0;
-        }
-        for (int i = 0; i < length1; i++){
-            dp[i][0] = 0;
-        }
-        for (int i = 1; i < length1; i++){
-            for (int j = 1; j < length2; j++){
-                if (text1.charAt(i-1)==text2.charAt(j-1)){
+        for(int i = 0; i < len1+1; i++){
+            for(int j = 0; j < len2+1; j++){
+                //初始化dp[][]行列第一个元素
+                if(i == 0 || j == 0){
+                    dp[i][j] = 0;
+                    continue;
+                }
+                if(s1.charAt(i-1) == s2.charAt(j-1)){
                     dp[i][j] = dp[i-1][j-1]+1;
                 }else{
-                    dp[i][j] = Math.max(dp[i-1][j],dp[i][j-1]);
+                    dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
                 }
-                //maxlength = dp[i][j]>maxlength?dp[i][j]:maxlength;
             }
         }
-        //return maxlength;
+//dp数组右下角的值就是累加的最大长度
         return dp[length1-1][length2-1];
     }
 ```
 
+> 输出子序列
 
+```java
+public String LCS (String s1, String s2) {
+    int length1 = s1.length();
+    int length2 = s2.length();
+    int[][] dp = new int[length1+1][length2+1];
+    for (int i = 0;i < length1+1; i++){
+        dp[i][0] = 0;
+    }
+    for (int j = 0;j < length1+1; j++){
+        dp[0][j] = 0;
+    }
+    for (int i = 1; i < length1+1; i++){
+        for (int j = 1; j < length2+1; j++){
+            if (s1.charAt(i-1)==s2.charAt(j-1)){
+                dp[i][j] = dp[i-1][j-1]+1;
+            }else{
+                dp[i][j] = Math.max(dp[i-1][j],dp[i][j-1]);
+            }
+        }
+    }
+//通过dp[][]数组还原子序列
+    StringBuilder sb = new StringBuilder();
+    int len1 = length1-1,len2 = length2-1;
+    while (len1>=0&&len2>=0){
+        if (s1.charAt(len1)==s2.charAt(len2)){
+            sb.append(s1.charAt(len1));
+            len1--;
+            len2--;
+        }else{
+            if (dp[len1][len2+1]>dp[len1+1][len2]) len1--;
+            else len2--;
+        }
+    }
+    if (sb.length()==0) return "-1";
+    return sb.reverse().toString();
+}
+```
+
+
+
+###### 46.括号序列
+
+> 给出一个仅包含字符'(',')','{','}','['和']',的字符串，判断给出的字符串是否是合法的括号序列。括号必须以正确的顺序关闭，"()"和"()[]{}"都是合法的括号序列，但"(]"和"([)]"不合法。
+
+```java
+public boolean isValid (String s) {
+    Stack<Character> stack = new Stack<>();
+    char[] array = s.toCharArray();
+    for (int i = 0; i < array.length; i++){
+        if (array[0]==')'||array[0]=='}'||array[0]==']') return false;
+        if (array[i]=='('||array[i]=='{'||array[i]=='['){
+            stack.push(array[i]);
+        }else if (!stack.isEmpty()){
+            if (array[i]==')'&&stack.pop()=='(') continue;
+            if (array[i]=='}'&&stack.pop()=='{') continue;
+            if (array[i]==']'&&stack.pop()=='[') continue;
+        }else return false;
+    }
+    if (stack.isEmpty()) return true;
+    return false;
+}
+```
+
+###### 47.字符串的**全排列**	回溯
+
+> 输入: "ab"
+> 输出: ["ab","ba"]
+
+```java
+public class Solution {
+    private ArrayList<String> res = new ArrayList<>();
+    private StringBuilder temp = new StringBuilder();
+    private TreeSet<String> treeset = new TreeSet<>();
+    private boolean[] visited;
+
+    public ArrayList<String> Permutation(String str) {
+        if (str == null || str.equals("")) {
+            return res;
+        }
+        char[] strs = str.toCharArray();
+        visited = new boolean[strs.length];
+        quanpailie(0,strs);
+        res.addAll(treeset);
+        return res;
+    }
+    public void quanpailie (int index, char[] strs){
+        if (index==strs.length){
+            treeset.add(temp.toString());
+            return;
+        }
+        for (int i = 0; i < strs.length; i++){
+            if (!visited[i]){
+                visited[i] = true;
+                temp.append(strs[i]);
+                quanpailie(index+1,strs);
+                visited[i] = false;
+                temp.deleteCharAt(temp.length()-1);
+            }
+        }
+    }
+}
+```
+
+###### 48.判断二叉树和为指定值的路径是否存在 dfs
+
+```java
+boolean flag = false;
+    public boolean hasPathSum (TreeNode root, int sum) {
+        hasPath(root,sum,0);
+        return flag;
+    }
+    public void hasPath (TreeNode root, int sum, int cnt) {
+        if (root==null||flag==true) return;
+        cnt += root.val;
+        if (cnt==sum&&root.left==null&&root.right==null){
+            flag = true;
+        }
+        //前序遍历
+        hasPath(root.left,sum,cnt);
+        hasPath(root.right,sum,cnt);
+    }
+```
+
+###### 49.输出二叉树和为指定值的路径的集合	dfs/回溯
+
+> 输入：{1,2},3
+> 输出：[[1,2]]
+
+```java
+ArrayList<ArrayList<Integer>> res = new ArrayList<>();
+ArrayList<Integer> path = new ArrayList<>();
+public ArrayList<ArrayList<Integer>> pathSum (TreeNode root, int sum) {
+    backTrace(root,sum,0);
+    return res;
+}
+public void backTrace(TreeNode root, int sum, int cnt){
+    if (root==null) return;
+    path.add(root.val);
+    cnt += root.val;
+    if (root.left==null&&root.right==null&&cnt==sum)
+        //*path是全局对象，会被覆盖，直接传path仅会保留最后一个，故每次通过构造函数new一个新ArrayList
+        res.add(new ArrayList<>(path));	
+    //N叉树的遍历无法用 回溯模板 中的for循环，直接顺序列出即可
+    backTrace(root.left,sum,cnt);
+    backTrace(root.right,sum,cnt);
+
+    list.remove(list.size()-1);	//移除最后一个
+}
+```
+
+###### 50.岛屿数量问题 dfs
+
+> 1代表是陆地，0代表海洋， 如果两个1相邻，那么这两个1属于同一个岛。相邻陆地可以组成一个岛屿（相邻:上下左右）
+> 输入：[[1,1,0,0,0],[0,1,0,1,1],[0,0,0,1,1],[0,0,0,0,0],[0,0,1,1,1]]
+> 输出：3
+
+```java
+public int solve (char[][] grid) {
+        int row = grid.length;
+        int col = grid[0].length;
+        int res = 0;
+        for (int i = 0; i < row; i++){
+            for (int j = 0; j < col; j++){
+                //遍历岛屿左上角
+                if (grid[i][j]=='1'){
+                    res++;
+                    dfs(grid,i,j);
+                }
+            }
+        }
+        return res;
+    }
+    public void dfs(char[][] grid, int i, int j) {
+        if (grid.length==0) return;
+        if (i<0||j<0||i>grid.length-1||j>grid[0].length-1||grid[i][j]=='0') return;
+        grid[i][j] = '0';	//从左上角把'1'均置为'0'
+        dfs(grid,i+1,j);
+        dfs(grid,i-1,j);
+        dfs(grid,i,j+1);
+        dfs(grid,i,j-1);
+    }
+```
+
+###### 51.最长回文子串
+
+```java
+//翻转求两个字符串的最长公共子串 好像行不通
+public int getLongestPalindrome(String A, int n) {
+    int maxlength = 0;
+    for (int i = 0; i < n; i++){
+        for (int j = i+1; j <= n; j++){
+            if (isPalindrome(A.substring(i,j))&&(j-i)>maxlength)
+                maxlength = j-i;
+        }
+    }
+    return maxlength;
+}
+public boolean isPalindrome(String s) {
+    char[] array = s.toCharArray();
+    int left = 0, right = array.length-1;
+    while (left<right){
+        if (array[left]!=array[right])
+            return false;
+        left++;
+        right--;
+    }
+    return true;
+}
+```
 
 
 
@@ -1449,6 +1656,7 @@ public void fastSort (int[] array,int start, int length) {
 }
 public int exchange(int[] array, int start, int last) {
     int temp = array[start];	//取array[0]为比较基准，小于temp的放左边，大于的放右边。
+    //头尾双指针
     int i = start;
     int j = last+1;
     while (true) {
