@@ -4,11 +4,11 @@
 
 ​	二叉排序树即二叉查找树，满足若左子树不空，则**左子树上所有结点的值均小于它的根结点的值**；若右子树不空，则**右子树上所有结点的值均大于或等于它的根结点的值**；左、右子树也分别为二叉排序树；
 
-#### **范型 类型擦除**
+#### 范型 类型擦除
 
 ​	自动装箱用的是ValueOf方法`Integer i = 3`；当执行算术运算时，会自动拆箱。
 
-#### **重写equals()必须重写hashcode()？**
+#### 重写equals()必须重写hashcode()
 
 ​	对于基本类型	==	比较的是数值；对于引用数据类型	==	比较的是地址
 ​	equals()	源码就是	==	；不能用于比较基本数据类型。
@@ -38,11 +38,35 @@ equals()的空指针异常
 
 
 
-#### **final关键字的特点：**
+#### final
 
-- ​	final修饰的类不能被继承，final类中的所有成员方法都会被隐式的指定为final方法；
-- ​	final修饰的方法不能被重写；
-- ​	final修饰的变量是常量，如果是基本数据类型的变量，则其数值一旦在初始化之后便不能更改；如果是引用类型的变量，则在对其初始化之后便不能让其指向另一个对象。
+> final修饰的类不能被继承，final类中的所有成员方法都会被隐式的指定为final方法；
+> ​final修饰的方法不能被重写；
+> ​final修饰的变量是常量，如果是基本数据类型的变量，则其数值一旦在初始化之后便不能更改；如果是引用类型的变量，则在对其初始化之后便不能让其指向另一个对象。
+
+​	在构造方法内，若读final属性晚于写final属性，那读的值可能不是定义的值；
+​	final属性可以通过**反射来修改**
+
+#### synchronized
+
+​	一个线程在获取`monitor`锁后才可以进入synchronized代码块，一旦**进入代码块**，该线程对于共享变量的缓存就会失效，因此 synchronized 代码块中对于共享变量的读取需要从主内存中重新获取，也就能**获取到最新的值**。
+​	**退出代码块**的时候的，会将该线程写缓冲区中的数据**刷到主内存**中，所以在 synchronized 代码块之前或 synchronized 代码块中对于共享变量的操作随着该线程退出 synchronized 块，会**立即对其他线程可见**（这句话的前提是其他读取共享变量的线程会从主内存读取最新值）
+​	总结：线程 a 对于进入 synchronized 块之前或在 synchronized 中对于共享变量的操作，对于后续的持有同一个监视器锁的线程 b 可见。
+
+> ​	Tips:在进入 synchronized 的时候，并不会保证之前的写操作刷入到主内存中，synchronized 主要是保证退出的时候能将本地内存的数据刷入到主内存。
+> ​	**对 Class 对象加锁、对对象加锁，它们之间不构成同步**。synchronized 作用于静态方法时是对 **Class 对象**加锁，作用于实例方法时是对实例加锁。
+> ​	一个类中的两个 synchronized static 方法之间是否构成同步？构成同步。
+
+#### volatile
+
+​	**内存可见性**和**禁止指令重排序**
+​	读一个 volatile 变量之前，需要先使相应的本地缓存失效，这样就必须到主内存读取最新值，写一个 volatile 属性会立即刷入到主内存。
+​	volatile 的禁止重排序并不局限于两个 volatile 的属性操作不能重排序，而且是 volatile 属性操作和它周围的普通属性的操作也不能重排序。
+
+> ​	volatile适用场景：某个属性被多个线程共享，其中有一个线程修改了此属性，其他线程可以立即得到修改后的值；
+> ​	volatile 属性的读写操作都是无锁的，它不能替代 synchronized，因为**它没有提供原子性和互斥性**；
+> ​	volatile **只能作用于属性**，我们用 volatile 修饰属性，这样 compilers 就不会对这个属性做指令重排序；
+> ​	volatile 可以使得 long 和 double 的赋值是原子的
 
 #### java8新特性
 
@@ -150,12 +174,192 @@ public static void main(String[] args) {
 
 ```
 
+#### Thread
 
+​	每个Java对象都关联了一个监视器，也关联了一个**线程等待集合**。
+
+​	Object.wait()以及Object.notify()都需要**持有对象monitor锁**才能正常进行，否则会抛出 IllegalMonitorStateException 异常。
+
+​	当线程被设置中断状态为true不会立即抛异常，而是等待重新**获取锁**之后才抛出异常。
+
+​	wait、notify和interrupt，若notify和interrupt同时发生，可能产生两种情况：wait正常返回，中断状态为true；wait抛出异常返回，中断状态重置为false。
+
+​	sleep()方法**不会释放任何监视器锁**，也**不具有**同步语义，即不会与主内存交互。
+
+#### 线程中断
+
+​	Java 中的中断和操作系统的中断不一样，线程中断代表**线程状态**，每个线程都关联了一个**中断状态**，是一个 true 或 false 的 boolean 值，初始值为 false。
+​	我们说中断一个线程，其实就是设置了线程的 interrupted status 为 true，至于说被中断的线程怎么处理这个状态，那是那个线程自己的事。
+
+​	如果线程处于以下三种情况，那么当线程被中断的时候，能自动感知到：
+​	1、来自 Object 类的 wait()，来自 Thread 类的 join()、sleep(long)，这几个方法的相同之处是，方法上都有: throws InterruptedException。如果线程阻塞在这些方法上（我们知道，这些方法会让当前线程阻塞），这个时候如果其他线程对这个线程进行了中断，那么这个线程会从这些方法中立即返回，抛出 InterruptedException 异常，同时重置中断状态为 false。
+​	2、实现了 InterruptibleChannel 接口的类中的一些 I/O 阻塞操作，如 DatagramChannel 中的 connect 方法和 receive 方法等。如果线程阻塞在这里，中断线程会导致这些方法抛出 ClosedByInterruptException 并重置中断状态。
+​	3、Selector 中的 select 方法
+
+​	**InterruptedException异常**
+​	Object 中的 wait() 方法，ReentrantLock 中的 lockInterruptibly() 方法，Thread 中的 sleep() 方法等等，这些方法都带有 `throws InterruptedException`，我们通常称这些方法为阻塞方法（blocking method）
+​	阻塞方法一个很明显的特征是，它们需要花费比较长的时间（不是绝对的，只是说明时间不可控），还有它们的方法结束返回往往依赖于外部条件，如 wait 方法依赖于其他线程的 notify，lock 方法依赖于其他线程的 unlock等等。
 
 #### String 和 StringBuffer、StringBuilder 的区别
 
 ​	String 类中使用`final`关键字修饰字符数组来保存字符串`private final char value[]`，故不可变。
 ​	String 中的对象是不可变的，也就可以理解为常量，线程安全；StringBuffer 对方法加了同步锁或者对调用的方法加了同步锁，所以是线程安全的。StringBuilder 并没有对方法进行加同步锁，所以是非线程安全的。
+
+#### Java BIO、NIO、AIO
+
+BIO 属于同步阻塞 IO 模型：来一个新的连接，就新开一个线程去处理，之后的操作全部由那个线程来完成。（一对一）
+
+NIO同步非阻塞IO（一对多）：
+
+​	**Buffer**：核心是ByteBuffer，想象成一个数组
+
+```java
+属性：三个index
+position
+//从写操作模式到读操作模式切换的时候（flip），position 都会归零
+//写操作：初始值是 0，每往 Buffer 中写入一个值，position 就自动加 1，代表下一次的写入位置。
+//读操作：每读一个值，position 就自动加 1
+limit
+//写操作模式下，limit 代表的是最大能写入的数据，这个时候 limit 等于 capacity
+//读模式，此时的 limit 等于 Buffer 中实际的数据大小
+capacity	//总容量
+```
+
+​	**Channel**
+​	`FileChannel`：文件通道，用于文件的读和写
+​	`DatagramChannel`：用于 UDP 连接的接收和发送
+​	`SocketChannel`：把它理解为 TCP 连接通道，简单理解就是 TCP 客户端
+//待补充
+​	`ServerSocketChannel`：TCP 对应的服务端，用于监听某个端口进来的请求
+//待补充
+​	**Selector**
+​		用于实现一个线程管理多个Channel
+
+AIO异步非阻塞IO：`AsynchronousSocketChannel`，`AsynchronousServerSocketChannel`和 `AsynchronousFileChannel`三个类
+
+### 23种设计模式
+
+##### 类、接口和类图
+
+​	类具有封装性、继承性和多态性。接口是一种特殊的类，它具有类的结构但不可以被实例化，只可以被子类实现，含有抽象操作不包含属性。
+
+​	类与类之间的关系（耦合度从弱到强）：
+​	<span style="color:red">依赖关系</span>：临时性的关联，某个类的方法通过局部变量、方法的参数或者对静态方法的调用来访问被依赖类中的某些方法；
+<span style="color:red">	关联关系</span>：对象之间的一种引用关系；
+<span style="color:red">	聚合关系</span>：整体与部分，has-a关系。部分可独立与整体存在；
+<span style="color:red">	组合关系</span>：整体与部分，cxmtains-a关系。部分与整体共生；
+<span style="color:red">	泛化关系</span>：继承关系，is-a关系；
+<span style="color:red">	实现关系</span>：接口与实现类之间的关系。	
+
+###### 单例模式
+
+​		单例类只有一个实例对象；单例对象必须由单例类自行创建；单例类对外提供一个访问该单例的全局访问点。
+​		优点：单例模式保证内存中只有一个实例，减小开销，避免对资源的多重占用。
+​		普通类的构造函数是公有的，外部类通过`new 构造函数()`来生成多个实例；若将构造函数设为**私有**，该类本身须定义一个静态私有实例，向外提供一个静态的public函数用于创建和获取该实例。
+
+​		单例模式的实现：
+
+```java
+//懒汉单例（用的少）
+public class LazySingleton{
+    private static volatile LazySingleton instance = null;	//volatile:线程之间的可见性
+/*volatile:保证此变量对所有线程的可见性；禁止指令重排序优化*/
+    private LazySingleton(){}	//private确保类不会在外部被实例化
+    public static synchronized LazySingleton getInstance(){
+        if (instance == null)
+            instance = new LazySingleton();
+        return instance;
+    }
+}	//volatile和synchronized保证线程安全。
+```
+
+> 实现可见性：volatile 、synchronized、final(引用逃逸)
+
+```java
+//饿汉单例
+public class HungrySingleton{
+    private static final HungrySingleton instance = new HungrySingleton();	//final
+    private HungrySingleton(){}
+    public static HungrySingleton getInstance(){
+        return instance;
+    }
+}	//在类创建的同时就已经创建好一个静态对象供系统使用，以后不再改变，线程安全。
+```
+
+```java
+//双检锁单例			实例域延迟初始化
+public class Singleton {
+    private volatile static Singleton instance;
+    private Singleton(){}
+    public Singleton getInstance(){
+        if (instance == null){	//不存在则加锁	判空为了提高效率
+            synchronized (Singleton.class){
+                if (instance == null){	//不存在则new	判空为了防止创建多个对象
+                    instance = new Singleton();
+                }
+            }
+        }
+        return instance;
+    }
+}
+```
+
+> ​	双检锁为什么要用volatile：
+> ​	有两个线程a、b，a在getInstance()执行到new Singleton()时，在给对象**属性赋值**以及对象**引用赋值**时可能发生**指令重排序**，导致线程b在getInstance()时认为instance不为null，直接返回未构造完成的instance。
+> ​	利用volatile禁止指令重排序
+
+```java
+//静态内部类			静态域延迟初始化
+public class Singleton {
+    private Singleton(){}
+    private static class Singleton SingletonHolder {
+        private static final Singleton INSTANCE = new Singleton();
+    }
+    public static final Singleton getInstance(){
+        return SingletonHolder.INSTANCE;
+    }
+}
+```
+
+###### 原型模式
+
+​	clone比new性能上更优。
+
+###### 工厂模式
+
+​	·简单工厂模式(静态工厂模式)	简单工厂、抽象产品接口、具体产品
+<span style="color:red">用方法返回不同实例对象来代替不同的构造函数，而不用new创建</span>	可避免构造函数冲突
+​	·工厂方法模式	抽象工厂接口、抽象产品接口、具体工厂实现、具体产品实现	（一类产品）
+​	·抽象工厂模式	抽象工厂接口**创建**抽象产品接口、具体工厂实现、具体产品实现	（多类产品）
+
+###### 建造者模式
+
+
+
+###### 代理模式
+
+​	静态代理：
+
+​	动态代理，包含两种：
+​	jdk动态代理：实现InvocationHandler接口重写invoke()方法与Proxy.newProxyInstance()方法。一个接口，一个实现类，一个代理类。
+​	CGlib动态代理：MethodIntercepter接口重写Intercept()方法，和Enhancer.create()创建代理类。一个被代理类，一个拦截器类实现了MethodIntercepter接口，一个代理类。
+​	区别：**JDK 动态代理只能只能代理实现了接口的类，而 CGLIB 可以代理未实现任何接口的类。**
+
+###### 观察者模式
+
+​	·推/拉模式：拉模式将被观察者**自身**传给观察者，观察者自取所需。
+​	·被观察者类Watched继承Observable类；Watcher实现Observer接口。Watched类watched.notify()通知Watcher类watcher.update(Observable o)更新。
+
+###### 模板方法模式
+
+​	定义一个操作中的算法骨架，而将算法的一些步骤延迟到子类中，使得子类可以不改变该算法结构的情况下重定义该算法的某些特定步骤。
+​	模板方法：定义了算法的骨架，按某种顺序调用其包含的基本方法。
+​	基本方法：是整个算法中的一个步骤，包含以下几种类型。
+- 抽象方法：在抽象类中声明，由具体子类实现。
+- 具体方法：在抽象类中已经实现，在具体子类中可以继承或重写它。
+- 钩子方法：在抽象类中已经实现，包括用于判断的逻辑方法和需要子类重写的空方法两种。
+
+AQS的设计就是基于模板方法模式。
 
 ### 计算机网络
 
@@ -401,32 +605,27 @@ top	#实时显示系统中各个进程的资源占用情况
 
 #### 死锁的四个条件
 
-- ​	互斥条件：该资源任意一个时刻只有一个线程占用；
-- ​	请求与保持条件：一个进程由于请求资源而阻塞，对已经获得的资源保持不放；
-- ​	不剥夺条件：线程已获得的资源在未使用完之前不能被其他线程强行剥夺，只有自己使用完毕后才释放资源；
-- ​	循环等待条件：若干进程之间形成一种首尾相连的的循环等待资源的关系。
+- 互斥条件：该资源任意一个时刻只有一个线程占用；
+- 请求与保持条件：一个进程由于请求资源而阻塞，对已经获得的资源保持不放；
+- 不剥夺条件：线程已获得的资源在未使用完之前不能被其他线程强行剥夺，只有自己使用完毕后才释放资源；
+- 循环等待条件：若干进程之间形成一种首尾相连的的循环等待资源的关系。
 
 #### 乐观锁与悲观锁
 
 ​	乐观锁多用于**多读**的场景，悲观锁多用于**多写**的场景。
 ​	乐观锁主要的两种实现方式：版本号机制、CAS
 
-##### 	乐观锁的缺点
+**乐观锁的缺点**：
+​	ABA问题：JDK 1.5 以后的 `AtomicStampedReference 类`就提供了此种能力，其中的 `compareAndSet 方法`就是首先检查当前引用是否等于预期引用，并且当前标志是否等于预期标志，如果全部相等，则以原子方式将该引用和该标志的值设置为给定的更新值。
+​	循环时间长，开销大：自旋CAS长时间不成功会带来执行开销。
+​	只能保证一个共享变量的原子操作：`AtomicReference类`来保证引用对象之间的原子性，你可以把多个变量放在一个对象里来进行 CAS 操作.所以我们可以使用锁或者利用`AtomicReference类`把多个共享变量合并成一个共享变量来操作。
 
-- ​	ABA问题：JDK 1.5 以后的 `AtomicStampedReference 类`就提供了此种能力，其中的 `compareAndSet 方法`就是首先检查当前引用是否等于预期引用，并且当前标志是否等于预期标志，如果全部相等，则以原子方式将该引用和该标志的值设置为给定的更新值。
-- ​	循环时间长，开销大：自旋CAS长时间不成功会带来执行开销。
-- ​	只能保证一个共享变量的原子操作：`AtomicReference类`来保证引用对象之间的原子性，你可以把多个变量放在一个对象里来进行 CAS 操作.所以我们可以使用锁或者利用`AtomicReference类`把多个共享变量合并成一个共享变量来操作。
-
-#### CAS解决ABA问题，如何保证原子性？
-
-​	计数器法；版本号法	
+​	**CAS解决ABA问题，如何保证原子性**：计数器法、版本号法	
 
 #### 分段锁
 
 ​	分段锁是一种锁的设计，细化了锁的粒度，对于`ConcurrentHashMap`，其并发实现就是通过分段锁的形式。其分段锁称为`Segment`，即`HashMap`中的`Entry`数组，数组中每个元素存的都是链表。`Segment`继承了`ReentrantLock`。
 ​	当`putVal`的时候，不是对整个`HashMap`加锁，而是对`hashcode`指向的分段加锁，实现了并行插入。
-
-#### 描述volatile
 
 #### 原子类的实现方式
 
@@ -438,49 +637,162 @@ top	#实时显示系统中各个进程的资源占用情况
 
 #### HashMap
 
-​	HashMap线程不安全，主要通过数组加链表实现，当链表长度**达到8**时，先考虑给table扩容，当**达到64**时，链表才转化为红黑树；当红黑树节点数**小于等于6**时可能退化为链表。
+**属性**：
+​	capacity：当前数组容量，始终保持 2^n，可以扩容，扩容后数组大小为当前的 2 倍；
+​	loadFactor：负载因子，默认为 0.75；
+​	threshold：扩容的阈值，等于 capacity * loadFactor(四分之三当前数组容量)
+
+​	计算数组下标主要通过`hash & (length-1)`；
+​	HashMap**扩容机制**：用一个新的大数组替换原来的小数组，并将原来数组中的值迁移到新的数组中。
+
+​	HashMap线程不安全，主要通过数组加单向链表实现，当链表长度**达到8**时，**先考虑给table数组扩容**，当**达到64**时，链表才转化为红黑树；当红黑树节点数**小于等于6**时可能退化为链表。
 > 红黑树是一个特殊的平衡二叉树，查找复杂度O(logn)
-#### HashMap扩容机制
+​	**HashTable和HashMap区别**：hashtable的方法是同步的，而hashmap不是；hashtable的key 和value都不可以为null,而hashmap可以。
 
-#### HashTable和HashMap区别
+#### ConcurrentHashMap
 
-​	hashtable的方法是同步的，而hashmap不是；
-​	hashtable的key 和value都不可以为null,而hashmap可以
+​	putVal()方法：
+> 若table数组为null或长度为0，初始化为**16**；
+> ​`(length-1)&hash`找到索引第一个节点，若桶中无元素则CAS加入；
+> ​若第一个节点值等于MOVED，则transfer数据转移；
+> ​若第一个节点为头节点但不为空，则对**头节点加锁**（分段锁，实现了**并行**插入），并在末尾加入新值，后判断链表长度>8？同样当链表长度**达到8**时，先考虑给table数组**扩容**，当**达到64**时，链表才转化为红黑树
 
-#### ConCurrentHashMap
+#### ArrayList
 
-#### ArrayList扩容机制
+​	默认构造函数初始化一个空数组，当添加第一个元素的时候，数组扩容为**10**。
+
+**扩容机制**：grow(int minCapacity)方法
+
+​	右移操作，新容量为原容量的**1.5倍**，若minCapacity还是超出扩容后容量，则hugeCapacity()
 
 ### 线程池
 
-#### 线程池的七大参数？
+#### ThreadPoolExecutor类
 
-​	线程池的构造函数有7个参数，分别是corePoolSize、maximumPoolSize、keepAliveTime、unit、workQueue、threadFactory、handler.
+##### 属性
+
 - corePoolSize：核心线程数
+
 - maximumPoolSize：最大线程数，线程池允许创建的最大线程数。
+
 - workQueue：
+
   任务队列，BlockingQueue 接口的某个实现（常使用 ArrayBlockingQueue 和 LinkedBlockingQueue）。
+
 - keepAliveTime：
+
   空闲线程的保活时间，如果某线程的空闲时间超过这个值都没有任务给它做，那么可以被关闭了。注意这个值并不会对所有线程起作用，如果线程池中的线程数少于等于核心线程数 corePoolSize，那么这些线程不会因为空闲太长时间而被关闭，当然，也可以通过调用 `allowCoreThreadTimeOut(true)`使核心线程数内的线程也可以被回收。
-- unit：空闲线程存活时间单位
-- threadFactory：用于生成线程
-- handler：拒绝策略	
 
-#### java 线程池有哪些关键属性？
+- threadFactory：
 
-> corePoolSize，maximumPoolSize，workQueue，keepAliveTime，rejectedExecutionHandler
+  用于生成线程，一般我们可以用默认的就可以了。通常，我们可以通过它将我们的线程的名字设置得比较可读一些，如 Message-Thread-1， Message-Thread-2 类似这样。
+
+- handler：
+
+  当线程池已经满了，但是又有新的任务提交的时候，该采取什么策略由这个来指定。有几种方式可供选择，像抛出异常、直接拒绝然后返回等，也可以自己实现相应的接口实现自己的逻辑，这个之后再说。
+
+  
+
+  线程池状态：
+
+- RUNNING：**初始化状态**，接受新的任务，处理等待队列中的任务（定义为-1）
+
+- SHUTDOWN：不接受**新**的任务提交，但是会继续处理等待队列中的任务（定义为0）
+
+- STOP：不接受新的任务提交，**不再处理等待队列中的任务**，中断正在执行任务的线程（>0）
+
+- TIDYING：所有的任务都销毁了，workCount 为 0。线程池的状态在转换为 TIDYING 状态时，会执行钩子方法 terminated()（>0）
+
+- TERMINATED：`terminated()` 方法结束后，线程池的状态就会变成这个（>0）
+
+> ​	用一个32位整数存放线程池状态和当前池中的线程数：
+>
+> ```JAVA
+> private final AtomicInteger ctl = new AtomicInteger(ctlOf(RUNNING,0));
+> ```
+>
+> 前3位表示线程池状态，后29位表示线程数。
+
+​	RUNNING -> SHUTDOWN：当调用了 shutdown() 后，会发生这个状态转换，这也是最重要的
+​	(RUNNING or SHUTDOWN) -> STOP：当调用 `shutdownNow() `后，会发生这个状态转换，这下要清楚 `shutDown()` 和 `shutDownNow() `的区别了
+
+##### 内部类Worker
+
+​	Worker 继承自 AQS 类 实现了Runnable接口。
+​	线程从任务队列（BlockingQueue）中取任务（`getTask()`方法）
+​	run()方法调用外部类的`runWorker()`方法。
+
+##### 方法
+
+**execute(Runnable command)**
+
+​	若当前线程数 < 核心线程数 `addWorker(command, true)`创建新线程去执行任务，之后返回；
+
+​	否则（当前线程数>=核心线程数 或 addWorker失败）若线程池处于RUNNING状态，将command任务添加到任务队列`workQueue.offer(command)`
+
+> 重新判断RUNNING状态，若不处于RUNNING状态则**移除当前入队任务`remove(command)`，并执行拒绝策略**；
+>
+> 若线程池处于RUNNING状态 && 若线程数为0，则开启新线程`addWorker(null, false)`<!--担心任务提交到队列中了，但是线程都关闭了-->
+
+​	若 workQueue 队列满了，则以 maximumQueueSize 创建新线程worker，失败则执行拒绝策略`reject(command)`
+
+**private boolean addWorker(Runnable firstTask, boolean core)**
+
+> ​	第二个参数core为true表示采用 核心线程数corePoolSize 作为创建线程的界限；为false表示采用 最大线程数maximumPoolSize 为界限。
+
+- 进入外死循环：获取当前**线程池状态**，若线程池状态 >= SHUTDOWN并且**排除**线程池处于SHUTDOWN状态 && firstTask为null && workQueue非空 的情况。（当线程池处于 SHUTDOWN 的时候，不允许提交任务，但是已有的任务继续执行；当状态大于 SHUTDOWN 时，不允许提交任务，且中断正在执行的任务）直接返回false
+
+- 进入内死循环：获取当前**线程数**，若线程数大于CAPACITY或大于core所指定的界限则直接返回false；若CAS增加线程数成功，跳出双重循环；若CAS失败判断线程池状态是否改变`runStateOf(c)!=rs`，若改变则回到外部循环。继续往下走：
+
+  ​    创建worker启动标志位workerStarted、成功加入workers HashSet的标志位workerAdded。获得线程池的全局锁ReentrantLock mainLock 、根据firstTask创建Worker，获得`worker.thread`;
+
+  ​	当该线程不为null时,`mainLock.lock()`进行操作：若线程池状态小于SHUTDOWN（running） or 等于SHUTDOWN且firstTask为null，（判断之前worker的thread是否已启动，已启动抛出异常）将worker加入workers的HashSet中，获得`workers.size()`并用largestPoolSize记录最大size值。设workerAdded为true。最后`mainLock.unlock()`;
+
+  ​	若workerAdded添加成功，启动线程，设workerStarted为true。
+
+  若workerStarted没有启动，执行`addWorkerFailed(Worker w)`;
+
+  返回workerStarted状态。
+
+**addWorkerFailed(Worker w)**
+
+​	获得线程池锁mainLock并加锁`mainLock.lock()`，若传入的Worker w 不为空则移除`workers.remove(w)`;`decrementWorkerCount()`WorkerCount减一；tryTerminate()后unlock()。
+
+**final void runWorker(Worker w)**
+
+​	获取w的firstTask，**若不为空 or `getTask()`返回不为null**进入**循环**，w上锁，若线程池状态大于STOP则中断当前线程，执行任务`task.run()`,后task指null，completedTasks累加并释放锁。
+
+**private Runnable getTask()**
+
+```java
+1. 阻塞直到获取到任务返回。我们知道，默认 corePoolSize 之内的线程是不会被回收的，
+     它们会一直等待任务
+2. 超时退出。keepAliveTime 起作用的时候，也就是如果这么多时间内都没有任务，那么应该执行关闭
+3. 如果发生了以下条件，此方法必须返回 null:
+	- 池中有大于 maximumPoolSize 个 workers 存在(通过调用 setMaximumPoolSize 进行设置)
+    - 线程池处于 SHUTDOWN，而且 workQueue 是空的，前面说了，这种不再接受*新*的任务
+    - 线程池处于 STOP，不仅不接受新的线程，连 workQueue 中的线程也不再执行
+```
+
+#### 线程池的七大参数
+
+​	线程池的构造函数有7个参数，分别是corePoolSize、maximumPoolSize、keepAliveTime、unit：空闲线程存活时间单位、workQueue、threadFactory、handler.（见上属性）
+#### java 线程池有哪些关键属性
+
+​	corePoolSize，maximumPoolSize，workQueue，keepAliveTime，rejectedExecutionHandler
+
 > corePoolSize 到 maximumPoolSize 之间的线程会被回收，当然 corePoolSize 的线程也可以通过设置而得到回收（allowCoreThreadTimeOut(true)）。
 > workQueue 用于存放任务，添加任务的时候，如果当前线程数超过了 corePoolSize，那么往该队列中插入任务，线程池中的线程会负责到队列中拉取任务。
 > keepAliveTime 用于设置空闲时间，如果线程数超出了 corePoolSize，并且有些线程的空闲时间超过了这个值，会执行关闭这些线程的操作
 > rejectedExecutionHandler 用于处理当线程池不能执行此任务时的情况，默认有**抛出 RejectedExecutionException 异常**、**忽略任务**、**使用提交任务的线程来执行此任务**和**将队列中等待最久的任务删除，然后提交此任务**这四种策略，默认为抛出异常。
 
-#### 说说线程池中的线程创建时机？
+#### 说说线程池中的线程创建时机
 
 > 1. 如果当前线程数少于 corePoolSize，那么提交任务的时候创建一个新的线程，并由这个线程执行这个任务；
 > 2. 如果当前线程数已经达到 corePoolSize，那么将提交的任务添加到阻塞队列中，等待线程池中的线程去阻塞队列中取任务；
 > 3. 如果阻塞队列已满，那么创建新的线程来执行任务，需要保证池中的线程数不会超过 maximumPoolSize，如果此时线程数超过了 maximumPoolSize，那么执行拒绝策略。
 
-#### 什么时候会执行拒绝策略？
+#### 什么时候会执行拒绝策略
 
 > 1. workers 的数量达到了 corePoolSize（任务此时需要进入任务队列），任务入队成功，与此同时线程池被关闭了，而且关闭线程池并没有将这个任务出队，那么执行拒绝策略。这里说的是非常边界的问题，入队和关闭线程池并发执行，读者仔细看看 execute 方法是怎么进到第一个 reject(command) 里面的。
 > 2. workers 的数量大于等于 corePoolSize，将任务加入到任务队列，可是队列满了，任务入队失败，那么准备开启新的线程，可是线程数已经达到 maximumPoolSize，那么执行拒绝策略。
@@ -557,6 +869,7 @@ select (..列名) count(*) from xxxx group by (列名) having (条件)
 where (列名) is null / (列名) is not null
 							< (>) (范围)
 							in (范围)
+							REGEXP '<正则表达式>'
 							
 #	判断varchar类型，需要用单引号''
 #	sql中/表示标准除法，如101/2得到50.5，而DIV表示整数除法，如101 DIV 2得到50
@@ -574,6 +887,8 @@ set @int := 0
 select @int := 0	#select设置变量只能用	:=	来设置
 ```
 
+#### 正则表达式
+
 ```mysql
 ^aa ：以 aa 为开头；
 aa$ ：以aa结尾；
@@ -586,8 +901,6 @@ a|b|c ：匹配a或b或c，（中|美）国；
 {n}  ：n 是一个非负整数。匹配确定的 n 次。例如，'o{2}' 不能匹配 "Bob" 中的 'o'，但是能匹配 "food" 中的两个 o；
 {n,m} ：m 和 n 均为非负整数，其中n <= m。最少匹配 n 次且最多匹配 m 次。
 ```
-
-
 
 #### delete, truncate, drop的区别
 
@@ -762,11 +1075,11 @@ MyISAM和InnoDB存储引擎使用的锁：
 
 ​	Redis-Key，String，List，Hash（key-map），Set，Sorted set
 
-#### 一致性Hash算法
+##### 一致性Hash算法
 
-​	1.将整个哈希值空间组织成一个虚拟的圆环，假设某哈希函数H的值空间为0-2^32-1（即哈希值是一个32位无符号整形）整个空间按顺时针方向组织，0和2^32重合；
-​	2.将各个服务器节点使用Hash进行一个哈希，确定其在圆环的位置；
-​	3.将数据对象使用相同的函数Hash计算出哈希值，并确定此数据在环上的位置，从此位置沿环顺时针“行走”，第一台遇到的服务器就是其应该定位到的服务器。
+- 将整个哈希值空间组织成一个虚拟的圆环，假设某哈希函数H的值空间为0-2^32-1（即哈希值是一个32位无符号整形）整个空间按顺时针方向组织，0和2^32重合；
+- 将各个服务器节点使用Hash进行一个哈希，确定其在圆环的位置；
+- 将数据对象使用相同的函数Hash计算出哈希值，并确定此数据在环上的位置，从此位置沿环顺时针“行走”，第一台遇到的服务器就是其应该定位到的服务器。
 
 ​	**容错性和可扩展性**：
 ​	若一台服务器不可用，则受影响的数据仅仅是此服务器到其环空间中前一台服务器之间的数据。
