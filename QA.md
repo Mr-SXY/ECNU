@@ -1184,18 +1184,15 @@ SqlSession sqlSession = sqlSessionFactory.openSession();
 解析CURD标签：在`ConfigurationElement()`方法内部调用`buildStatementFromContext()`方法，该方法内创建`new XMLStatementBuilder`来负责mapper文件的<select|update|insert|delete>节点的解析工作，并且调用了其`statementParser.parseStatementNode()`方法。方法内能够将<select>等元素内部的SQL语句会被放入到SqlSource对象中。最终解析完后会调用MapperBuilderAssistant的addMappedStatement()方法，将<select|insert>等解析完的东西统一封装到MappedStatement中，然后将对象放到Configuration的StrictMap中。key为sql语句的id，value为构造好的MapperStatement对象。（同样不允许重复）
 
 2.`SqlSession`会话的创建：
-
 mybatis操作的时候跟数据库的每一次连接,都需要创建一个会话,我们用openSession()方法来创建。这个会话里面需要包含一个Executor用来执行 SQL。
 
 - 如果配置的是 JDBC,则会使用Connection 对象的 commit()、rollback()、close()管理事务。
 - 如果配置成MANAGED,会把事务交给容器来管理,比如 JBOSS,Weblogic。
 
 3.获得`Mapper`对象：
-
 `UserMapper userMapper = sqlSession.getMapper(UserMapper.class)`来获取对象。由`UserMapper`的类型通过`configration`下`mapperRegistry`里的`knownMappers`获取对应的工厂类。这里通过JDK动态代理返回代理对象
 
 4.执行SQL：
-
 执行语句如`User user = userMapper.getUserById(1)`调用`invoke()`代理方法：在`invoke()`方法中，从缓存中获取`MapperMethod`：`final MapperMethod mapperMethod = cachedMapperMethod(method)`，接着执行`MapperMethod`的`execute()`方法。最终是从Configuration中获取封装了<select|update|insert|delete>节点信息的MappedStatement对象，获取到了该对象就说明了获取到了待执行的sql语句信息。
 
 (参考：https://segmentfault.com/a/1190000038832242?utm_source=tag-newest、https://blog.csdn.net/u012557538/article/details/90080929#t2)
