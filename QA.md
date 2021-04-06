@@ -1039,14 +1039,26 @@ ReadView算法：RR和RC生成的ReadView策略不同，已提交读（RC）下�
 
 **redolog（物理上的恢复）（innoDB引擎层实现，非所有引擎都有）**
 
-保证事务的**持久性**。真正访问页面前，需要将磁盘上的页缓存到内存中的`Buffer Pool`中，而若事务提交时发生故障，如何保证事务持久性，在**事务提交之前就把事务修改的页面刷新到磁盘**显然太慢。所以只需要**记录一下修改了哪些东西**。（优点：占用空间小；顺序io）
-`redolog`包括两部分：一是内存中的日志缓冲(redo log buffer)，该部分日志是易失性的；二是磁盘上的重做日志文件(redo log file)，该部分日志是持久的。
+保证事务的**持久性**。真正访问页面前，需要将磁盘上的页缓存到内存中的Buffer Pool中，然后在buffer pool中进行修改，那么这个时候buffer pool中的数据页就与磁盘上的数据页内容不一致，称buffer pool的数据页为dirty page 脏数据，而若事务提交时发生故障，如何保证事务持久性，就有了redolog文件。
+redolog的优点：
 
-redolog一般格式：type(该条log类型)+space ID(表空间id)+page number(页号)+data(redolog具体内容)；
+- 当buffer pool中的dirty page 还没有刷新到磁盘的时候，发生crash，启动服务后，可通过redo log 找到需要重新刷新到磁盘文件的记录；
+- buffer pool中的数据直接flush到disk file，是一个随机IO，效率较差，而把buffer pool中的数据记录到redo log，是一个**顺序IO**，可以提高事务提交的速度；
+
+`redolog`包括两部分：一是内存中的日志缓冲(redo log buffer)，该部分日志是易失性的；二是磁盘上的重做日志文件(redo log file)，该部分日志是持久的。`mysql`支持用户自定义在commit时如何将log buffer中的日志刷log file中。由`innodb_flush_log_at_trx_commit`来决定，该变量有3种值：0、1、2。
+
+- 当设置为1的时候，事务每次提交都会将log buffer中的日志写入os buffer并调用fsync()刷到log file on disk中。这种方式即使系统崩溃也不会丢失任何数据，但是因为每次提交都写入磁盘，IO的性能较差。
+- 当设置为0的时候，事务提交时不会将log buffer中日志写入到os buffer，而是每秒写入os buffer并调用fsync()写入到log file on disk中。也就是说设置为0时是(大约)每秒刷新写入到磁盘中的，当系统崩溃，会丢失1秒钟的数据。
+- 当设置为2的时候，每次提交都仅写入到os buffer，然后是每秒调用fsync()将os buffer中的日志写入到log file on disk。
+
+redolog**一般格式**：type(该条log类型)+space ID(表空间id)+page number(页号)+data(redolog具体内容)；
 以组的形式写入redolog：向某个B+树中插入索引的过程可能会产生很多条redolog，认为这一组redolog要保证原子性。将这种对底层页面的一次原子访问过程称为Mini-Transection（简称mtr）。
-redolog记录方式：空间固定，采用循环写的方式记录。写到结尾会回到开头覆盖原来记录。（参考：https://www.jianshu.com/p/4bcfffb27ed5）
+redolog记录方式：空间固定，采用循环写的方式记录。写到结尾会回到开头覆盖原来记录。
+参考：https://www.jianshu.com/p/4bcfffb27ed5
 
 乐观插入和悲观插入：是否会发生`页分裂`。
+
+日志块：`redolog buffer`或`redolog file`由很多`redolog block`组成，每个redo log block由3部分组成：**日志块头、日志块尾和日志主体**。其中日志块头占用12字节，日志块尾占用8字节，所以每个redo log block的日志主体部分只有512-12-8=492字节。
 
 redolog**刷盘时机**：
 mtr运行过程中产生的一组redolog会被复制到`log buffer`中（顺序写），在下列情况下会更新到磁盘：
@@ -1054,7 +1066,7 @@ mtr运行过程中产生的一组redolog会被复制到`log buffer`中（顺序�
 
 **undolog（逻辑上）**
 
-`undo log`提供事务回滚以及是`MVCC`(多版本并发控制)实现的关键。保证数据的**原子性**，将数据从逻辑上恢复至事务之前的状态。`insert`操作产生的`undolog`在事务提交后即会被删除。**可以认为当delete一条记录时，undo log中会记录一条对应的insert记录，反之亦然，当update一条记录时，它记录一条对应相反的update记录。undo log是采用段(segment)的方式来记录的，每个undo操作在记录的时候占用一个undo log segment。**
+`undo log`提供事务回滚以及是`MVCC`(多版本并发控制)实现的关键。保证数据的**原子性**，将数据从逻辑上恢复至事务之前的状态。`insert`操作产生的`undolog`在事务提交后即会被删除。**可以认为当delete一条记录时，undo log中会记录一条对应的insert记录，反之亦然，当update一条记录时，它记录一条对应相反的update记录。undo log是采用段(segment)的方式来记录的，每个undo操作在记录的时候占用一个undo log segment。undo log也会产生redo log，因为undo log也要实现持久性保护。**
 
 #### binlog和事务日志的顺序？
 
@@ -1079,7 +1091,7 @@ Explain：待补充。。。。
 
 #### 为什么mysql字段设成not null？
 
-1. `not null`和空值的区别：空值不占空间，NULL值占空间；
+1. `not null`和空值的区别：空值不占空间，NULL值占空间（NULL 列需要更多的存储空间，一般需要一个额外的字节作为判断是否为 NULL 的标志位）；
 2. NULL值占用空间，故NULL会参与字段比较，导致效率降低；
 3. 查询中包含可为NULL的列，不利于查询优化。
 
@@ -1114,7 +1126,7 @@ redis有**16**个数据库，默认使用第0个，可用select进行切换：`s
 ##### 缓存穿透和缓存雪崩
 
 > 缓存穿透：大量请求的 key 根本不存在于缓存中，导致请求直接到了数据库上，根本没有经过缓存这一层。
-> 解决方案：<a herf="https://snailclimb.gitee.io/javaguide/#/docs/dataStructures-algorithms/data-structure/bloom-filter">布隆过滤器</a>
+> 解决方案：[布隆过滤器](https://snailclimb.gitee.io/javaguide/#/docs/dataStructures-algorithms/data-structure/bloom-filter)
 
 > 缓存雪崩：缓存在同一时间大面积的失效，后面的请求都直接落到了数据库上，造成数据库短时间内承受大量请求；或者有一些被大量访问数据（热点缓存）在某一时刻大面积失效，导致对应的请求直接落到了数据库上。
 > 解决方案：合理设置过期时间时间；限流。
@@ -1130,10 +1142,15 @@ Redis-Key，String，List，Hash(key-map)，Set，Sorted set
 - 将数据对象使用相同的函数Hash计算出哈希值，并确定此数据在环上的位置，从此位置沿环顺时针“行走”，第一台遇到的服务器就是其应该定位到的服务器。
 
 **容错性和可扩展性**：
-​若一台服务器不可用，则受影响的数据仅仅是此服务器到其环空间中前一台服务器之间的数据。
-​若新增一个服务器，则受影响的数据仅仅是新服务器到其环空间中前一台服务器之间的数据
+若一台服务器不可用，则受影响的数据仅仅是此服务器到其环空间中前一台服务器之间的数据。
+若新增一个服务器，则受影响的数据仅仅是新服务器到其环空间中前一台服务器之间的数据
 
 **数据倾斜问题**：由于节点数太少,导致大量数据集中在个别服务器上，引入**虚拟节点机制**解决，即对每一个服务节点计算多个哈希，每个计算结果位置都放置一个此服务节点，称为虚拟节点。具体做法可以在服务器ip或主机名的后面增加编号来实现。
+
+##### redis高并发和快速原因？
+1.redis基于内存；
+2.redis是单线程的，省去了上下文切换的时间；
+3.redis使用多路复用的技术，可以处理并发的连接。非阻塞IO内部实现采用epoll（目前最好的多路复用技术），采用epoll+自己实现的简单事件的框架。（不清楚）
 
 ##### redis单线程为什么这么快？
 
