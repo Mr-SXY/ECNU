@@ -220,6 +220,7 @@ executor.execute(new RunnableTask());//重写execute方法
 #### BlockingQueue
 
 ##### 	ArrayBlockingQueue
+
 ​	基于AQS的Condition队列实现：
 ```java
 属性：

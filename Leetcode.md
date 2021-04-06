@@ -1,4 +1,4 @@
-###### 1.翻转二叉树/二叉树的镜像
+###### 	1.翻转二叉树/二叉树的镜像
 
 ```
 输入：
@@ -149,6 +149,7 @@ class Solution {
         boolean flag = false;
         int i = matrix.length - 1;
         int j = 0;
+        //[matrix.length - 1,0]处于 行最大列最小的位置。[0,matrix[0].length - 1]处也可以
         while(i >= 0 && j <= matrix[0].length - 1){
             if(matrix[i][j] > target) i--;
             else if(matrix[i][j] < target) j++;
@@ -1618,7 +1619,7 @@ public int solve (char[][] grid) {
 public int getLongestPalindrome(String A, int n) {
     int maxlength = 0;
     for (int i = 0; i < n; i++){
-        for (int j = i+1; j <= n; j++){
+        for (int j = i+1; j <= n; j++){	//暴力遍历
             if (isPalindrome(A.substring(i,j))&&(j-i)>maxlength)
                 maxlength = j-i;
         }
@@ -1637,6 +1638,106 @@ public boolean isPalindrome(String s) {
     return true;
 }
 ```
+
+###### 52.重排链表	&&	判断回文链表
+
+> 对于给定的单链表{10,20,30,40}，将其重新排序为{10,40,20,30}.
+
+```java
+//***************重排****************
+public void reorderList(ListNode head) {
+    if (head==null||head.next==null||head.next.next == null) return;
+    ListNode p = head;
+    ListNode mid = getMiddle(head);
+    ListNode q = mid.next;
+    mid.next = null;	//中间左边为尾节点，next指向null
+    q = reverse(q);	//获取中间节点后，后面部分链表反转，然后顺序遍历
+    while (q!=null){
+        ListNode tmp = q.next;
+        q.next = p.next;
+        p.next = q;
+        p = q.next;
+        q = tmp;
+    }
+}
+//***************回文***************
+public boolean isPail (ListNode head) {
+        ListNode mid = getMiddle(head).next;
+        mid = reverse(mid);
+        while (mid!=null){
+            if (mid.val!=head.val) return false;
+            mid = mid.next;
+            head = head.next;
+        }
+        return true;
+    }
+//获取中间节点：奇数是中间节点，偶数是中间左边节点
+public ListNode getMiddle(ListNode head){
+    if(head==null) return null;
+    ListNode fast = head.next;
+    ListNode slow = head;
+    while(fast!=null&&fast.next!=null){
+        fast = fast.next.next;
+        slow = slow.next;
+    }
+    return slow;
+}
+public ListNode reverse(ListNode head){
+    ListNode nhead = new ListNode(0);
+    nhead.next = head;
+    ListNode pre = head;
+    ListNode cur = null;
+    while(pre.next!=null){
+        cur = pre.next;
+        pre.next = cur.next;
+        cur.next = nhead.next;
+        nhead.next = cur;
+    }
+    return nhead.next;
+}
+```
+
+###### 53.一次股票
+
+> 假设你有一个数组，其中第*i*个元素是股票在第*i*天的价格。
+> 你有一次买入和卖出的机会。（只有买入了股票以后才能卖出）。请你设计一个算法来计算可以获得的最大收益。
+> 输入：[1,4,2]
+> 返回：3
+
+```java
+//滑动窗口
+public int maxProfit (int[] prices) {
+    int left = 0, right = 0;
+    int length = prices.length;
+    int[] temp = new int[length];
+    temp[0] = 0;
+    int max = 0, sum = 0;
+    for (int i = 1; i < length; i++) {
+        temp[i] = prices[i] - prices[i - 1];
+    }
+    while (right<length){
+        //**累加和为负数**才改变头指针位置，累加和为正说明之前的变化对总和的贡献是正的
+        //而不是一碰到负的情况就改变头指针位置
+        if (sum(temp,left,right)<0){
+            left = right;
+        }else {
+            if (sum(temp,left,right)>max)
+                max = sum(temp,left,right);
+        }
+        right++;
+    }
+    return max;
+}
+public int sum(int[] arr,int left, int right){
+    int sum = 0;
+    for (int i = left+1; i <= right; i++) {
+        sum += arr[i];
+    }
+    return sum;
+}
+```
+
+
 
 
 
@@ -1747,5 +1848,71 @@ public int[] getLeastNumbers(int[] arr, int k) {
             newArr[i] = arr[i];
         return newArr;
     }
+```
+
+#### 集合遍历
+
+```java
+//*************HashSet**************
+HashSet<Integer> set = new HashSet<>();
+Iterator<Integer> it = set.iterator();
+while (it.hasNext()){
+    Integer tmp = it.next();
+    if (...) {
+        it.remove();	//遍历时移除元素
+    }
+    ...
+}
+//************************************
+//*************HashMap**************
+//entrySet (key && value)
+HashMap<Integer,Integer> map = new HashMap<>();
+Set<Map.Entry<Integer, Integer>> entrySet = map.entrySet();
+Iterator<Map.Entry<Integer, Integer>> it = entrySet.iterator();
+while (it.hasNext){
+    it.next();
+    ...
+}
+//KeySet (only key)
+HashMap<Integer,Integer> map = new HashMap<>();
+Set<Integer> set = map.KeySet();
+Iterator<Integer> it = set.iterator();
+while (it.hasNext){
+    it.next();
+    ...
+}
+//************************************
+//*************ArrayList**************
+for(int i = 0; i < list.size(); i++){
+    list.get(i);
+    ...
+}
+```
+
+#### 字符串操作
+
+```java
+
+```
+
+#### 排序
+
+```java
+ArrayList<Integer> list = new ArrayList<>();
+
+Collections.sort(list);	//直接传
+Collections.sort(list, new Comparator<Integer>(){	//Comparator自定义比较
+    public int compare(Integer o1, Integer o2) {
+                    return o1-o2;
+    }
+});//等价于：
+Collections.sort(list, (o1,o2)->o1-o2);
+
+list.sort(new Comparator<Integer>(){	//同样可以自定义
+    public int compare(Integer o1, Integer o2) {
+                    return o1-o2;
+    }
+});//等价于：
+list.sort((o1,o2)->o1-o2);
 ```
 
