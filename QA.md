@@ -1183,11 +1183,13 @@ SqlSession sqlSession = sqlSessionFactory.openSession();
 
 解析CURD标签：在`ConfigurationElement()`方法内部调用`buildStatementFromContext()`方法，该方法内创建`new XMLStatementBuilder`来负责mapper文件的<select|update|insert|delete>节点的解析工作，并且调用了其`statementParser.parseStatementNode()`方法。方法内能够将<select>等元素内部的SQL语句会被放入到SqlSource对象中。最终解析完后会调用MapperBuilderAssistant的addMappedStatement()方法，将<select|insert>等解析完的东西统一封装到MappedStatement中，然后将对象放到Configuration的StrictMap中。key为sql语句的id，value为构造好的MapperStatement对象。（同样不允许重复）
 
+
 2.`SqlSession`会话的创建：
 mybatis操作的时候跟数据库的每一次连接,都需要创建一个会话,我们用openSession()方法来创建。这个会话里面需要包含一个Executor用来执行 SQL。
 
 - 如果配置的是 JDBC,则会使用Connection 对象的 commit()、rollback()、close()管理事务。
 - 如果配置成MANAGED,会把事务交给容器来管理,比如 JBOSS,Weblogic。
+
 
 3.获得`Mapper`对象：
 `UserMapper userMapper = sqlSession.getMapper(UserMapper.class)`来获取对象。由`UserMapper`的类型通过`configration`下`mapperRegistry`里的`knownMappers`获取对应的工厂类。这里通过JDK动态代理返回代理对象
@@ -1203,39 +1205,33 @@ mybatis操作的时候跟数据库的每一次连接,都需要创建一个会话
 
 #### 运行时数据区
 
-##### 程序计数器
-
+**程序计数器：**
 每条线程都需要有一个独立的程序计数器，各线程之间计数器互不影响，独立存储，我们称这类内存区域为**线程私有**的内存。
-​程序计数器不会出现OOM异常
+程序计数器不会出现OOM异常
 
-##### java虚拟机栈
-
+**java虚拟机栈：**
 Java 虚拟机栈也是**线程私有**的，它的生命周期和线程相同，每次方法调用的数据都是通过栈传递的。
-​Java 虚拟机栈是由一个个**栈帧**组成，而每个栈帧中都拥有：**局部变量表、操作数栈、动态链接、方法出口信息**。
-​**局部变量表**主要存放了编译期可知的各种数据类型（boolean、byte、char、short、int、float、long、double），对象引用（reference 类型，它不同于对象本身，可能是一个指向对象起始地址的引用指针，也可能是指向一个代表对象的句柄或其他与此对象相关的位置）。
+Java 虚拟机栈是由一个个**栈帧**组成，而每个栈帧中都拥有：**局部变量表、操作数栈、动态链接、方法出口信息**。
+**局部变量表**主要存放了编译期可知的各种数据类型（boolean、byte、char、short、int、float、long、double），对象引用（reference 类型，它不同于对象本身，可能是一个指向对象起始地址的引用指针，也可能是指向一个代表对象的句柄或其他与此对象相关的位置）。
 
 Java 虚拟机栈会出现两种错误：`StackOverFlowError` 和 `OutOfMemoryError`
 
 java方法的调用：
-​Java 栈中保存的主要内容是**栈帧**，每一次函数调用都会有一个对应的栈帧被压入 Java 栈，每一个函数调用结束后，都会有一个栈帧被弹出。Java 方法有两种返回方式：return 语句；抛出异常。不管哪种返回方式都会导致栈帧被弹出。
+Java 栈中保存的主要内容是**栈帧**，每一次函数调用都会有一个对应的栈帧被压入 Java 栈，每一个函数调用结束后，都会有一个栈帧被弹出。Java 方法有两种返回方式：return 语句；抛出异常。不管哪种返回方式都会导致栈帧被弹出。
 
-##### 本地方法栈
-
+**本地方法栈：**
 本地方法栈为虚拟机使用到的 Native 方法服务。本地方法被执行的时候，在本地方法栈也会创建一个栈帧，用于存放该本地方法的局部变量表、操作数栈、动态链接、出口信息。
 
-##### java堆
-
+**java堆：**
 Java 堆是所有线程共享的一块内存区域，在虚拟机启动时创建。此内存区域的唯一目的就是存放对象实例，**几乎所有**的对象实例以及数组都在这里分配内存。（有些在栈上分配内存）
-​Java 堆还可以细分为：新生代和老年代；或：Eden 空间、From Survivor、To Survivor 空间等（8:1:1）。JDK8后永久代被移除到元空间中。
+Java 堆还可以细分为：新生代和老年代；或：Eden 空间、From Survivor、To Survivor 空间等（8:1:1）。JDK8后永久代被移除到元空间中。
 
 java堆容易出现`OutOfMemoryError`异常。
 
-##### 方法区
-
+**方法区：**
 方法区是各个线程共享的内存区域，它用于存储**已被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码**等数据。
 
-##### 运行时常量池
-
+**运行时常量池：**
 运行时常量池是**方法区**的一部分（OOM异常）。Class 文件中除了有类的版本、字段、方法、接口等描述信息外，还有常量池表（用于存放编译期生成的各种字面量和符号引用）
 
 **字符串常量池**被单独拿到**堆**,运行时常量池剩下的东西还在方法区。
