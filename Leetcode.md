@@ -1408,8 +1408,8 @@ public String LCS (String str1, String str2) {
 public int longestCommonSubsequence(String text1, String text2) {
         int length1 = text1.length()+1, length2 = text2.length()+1;
         int[][] dp = new int[length1][length2];
-        for(int i = 0; i < len1+1; i++){
-            for(int j = 0; j < len2+1; j++){
+        for(int i = 0; i < length1; i++){
+            for(int j = 0; j < length2; j++){
                 //初始化dp[][]行列第一个元素
                 if(i == 0 || j == 0){
                     dp[i][j] = 0;
